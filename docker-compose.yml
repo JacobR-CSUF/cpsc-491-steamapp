@@ -1,0 +1,40 @@
+# Docker compose file for local development environment.
+# Postgres and Redis (KAN-24)
+
+# Start: docker compose up -d
+# Credentials and ports are read from .env (copy .env.example to .env).
+
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-showdown}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-showdown}
+      POSTGRES_DB: ${POSTGRES_DB:-showdown}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-showdown} -d ${POSTGRES_DB:-showdown}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
+  redis_data:
