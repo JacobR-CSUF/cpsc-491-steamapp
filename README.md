@@ -75,4 +75,50 @@ Credentials and ports are read from .env. If port 5432 or 6379 is taken, change 
 
 ## Backend
 
+The backend is built with FastAPI and runs on Python 3.12. All commands below should be executed from inside the `backend/` directory.
+
+### Environment Setup
+
+Create and activate a Python virtual environment:
+
+**Windows (Command Prompt):**
+```console
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+```
+
+**macOS/Linux:**
+```console
+cd backend
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### Install Dependencies
+
+```console
+pip install -r requirements.txt
+```
+
+### Run the Server
+
+Start Postgres and Redis from the repository root with `docker compose up -d`, then run from `backend/`:
+
+```console
+fastapi dev app/main.py
+```
+
+The API is available at `http://localhost:8000`. Check service status at
+`http://localhost:8000/api/health` and interactive API docs at
+`http://localhost:8000/docs`.
+
+### Run Tests
+
+Run the test suite from `backend/`:
+
+```console
+python -m pytest
+```
+
 ## Frontend
