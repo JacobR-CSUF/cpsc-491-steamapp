@@ -122,3 +122,48 @@ python -m pytest
 ```
 
 ## Frontend
+Requires Node.js 24.
+
+From the repository root, install dependencies:
+
+```console
+cd frontend
+npm install
+```
+
+Create the frontend's local environment file:
+
+```console
+# macOS/Linux
+cp .env.example .env.local
+
+# Windows PowerShell
+Copy-Item .env.example .env.local
+```
+
+The default backend URL in `.env.local` is:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
+
+Start the frontend:
+
+```console
+npm run dev
+```
+
+Open http://localhost:3000.
+
+The home page displays backend service statuses and refreshes every
+10 seconds. If the backend cannot be reached, it displays
+"Backend unreachable".
+
+Run lint checks from the frontend directory:
+
+```console
+npm run lint
+```
+
+On Windows PowerShell, use `npm.cmd` instead of `npm` if script
+execution is blocked.
