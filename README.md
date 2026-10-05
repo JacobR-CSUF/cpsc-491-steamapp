@@ -25,6 +25,36 @@ Compares two public Steam profiles by achievements, completed games, and library
 
 ## Environment Variables
 
+Create your local environment file from the shared template in the repository root:
+
+```console
+# macOS/Linux
+cp .env.example .env
+
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+Open `.env` and paste your Steam Web API key after `STEAM_API_KEY=`. Never commit `.env`; it is ignored by Git. Confirm that with:
+
+```console
+git check-ignore .env
+```
+
+Verify Steam Web API access with a public SteamID64:
+
+```console
+python3 scripts/check_steam_api.py <steamid64>
+```
+
+On Windows, if `python3` is not available, use:
+
+```console
+python scripts/check_steam_api.py <steamid64>
+```
+
+Your SteamID64 is available from your Steam account details page. The script prints the display name, profile visibility, and owned-game count; if the game library is private, it reports it as hidden.
+
 ## Database and Cache
 On Windows, install WSL 2 **before** Docker Desktop. Confirm Docker works with `docker run hello-world`.
 
