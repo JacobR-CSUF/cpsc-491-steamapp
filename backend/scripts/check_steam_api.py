@@ -10,22 +10,16 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 STEAM_API_BASE = "https://api.steampowered.com"
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parents[2]
 ENV_FILE = REPO_ROOT / ".env"
 
 
 def read_env_file(path: Path = ENV_FILE) -> dict[str, str]:
-    """Load KEY=VALUE pairs from the root .env file.
-
-    Existing process environment variables take precedence over values in
-    .env. Blank lines and lines beginning with # are ignored.
-    """
+    """Load KEY=VALUE pairs from the root .env file if it exists."""
     values: dict[str, str] = {}
 
     if not path.exists():
-        raise FileNotFoundError(
-            f"Missing {path}. Copy .env.example to .env and add STEAM_API_KEY."
-        )
+        return values
 
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
@@ -154,7 +148,7 @@ def main() -> int:
             print("Owned games: hidden (library is private)")
 
         return 0
-    except (FileNotFoundError, RuntimeError) as exc:
+    except RuntimeError as exc:
         print(f"Error: {exc}", file=sys.stderr)
         return 1
 

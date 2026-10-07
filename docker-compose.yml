@@ -1,32 +1,22 @@
-# Docker compose file for local development environment.
-# Postgres and Redis (KAN-24)
-
-# Start: docker compose up -d
-# Credentials and ports are read from .env (copy .env.example to .env).
+name: cpsc-491-steamapp
 
 services:
   postgres:
     image: postgres:17
-    restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-showdown}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-showdown}
-      POSTGRES_DB: ${POSTGRES_DB:-showdown}
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      POSTGRES_USER: showdown
+      POSTGRES_PASSWORD: showdown
+      POSTGRES_DB: showdown
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-showdown} -d ${POSTGRES_DB:-showdown}"]
+      test: ["CMD-SHELL", "pg_isready -U showdown -d showdown"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   redis:
     image: redis:7
-    restart: unless-stopped
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -34,6 +24,35 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://showdown:showdown@postgres:5432/showdown
+      REDIS_URL: redis://redis:6379/0
+      STEAM_API_KEY: ${STEAM_API_KEY:-}
+      WATCHFILES_FORCE_POLLING: "true"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      WATCHPACK_POLLING: "1000"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
