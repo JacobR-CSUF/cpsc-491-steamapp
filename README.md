@@ -14,9 +14,21 @@ Compares two public Steam profiles by achievements, completed games, and library
 
 - Git
 - Docker Desktop
-- Node.js 24
-- Python 3.12
 - VS Code
+
+On Windows, install [WSL 2](https://learn.microsoft.com/en-us/windows/wsl/install) before Docker Desktop.
+
+On Linux, Docker Engine with the Compose plugin also works. Add yourself to the `docker` group so commands run without `sudo`, then log out and back in:
+
+```console
+sudo usermod -aG docker $USER
+```
+
+Confirm Docker works:
+
+```console
+docker run hello-world
+```
 
 ## Branch and Commit Format
 
@@ -25,145 +37,76 @@ Compares two public Steam profiles by achievements, completed games, and library
 
 ## Environment Variables
 
-Create your local environment file from the shared template in the repository root:
+Create `.env` in the repository root from the template.
+
+**macOS/Linux**
 
 ```console
-# macOS/Linux
 cp .env.example .env
+```
 
-# Windows PowerShell
+**Windows PowerShell**
+
+```console
 Copy-Item .env.example .env
 ```
 
-Open `.env` and paste your Steam Web API key after `STEAM_API_KEY=`. Never commit `.env`; it is ignored by Git. Confirm that with:
+Paste your Steam Web API key after `STEAM_API_KEY=`. Git ignores `.env`. After editing it, run `docker compose up -d` to apply the change.
+
+## Running the Stack
+
+Start or update everything from the repository root:
 
 ```console
-git check-ignore .env
+docker compose up -d --build
 ```
 
-Verify Steam Web API access with a public SteamID64:
+Open http://localhost:3000. The home page shows API, Postgres, and Redis status. Ports 3000 and 8000 must be free.
 
-```console
-python3 scripts/check_steam_api.py <steamid64>
-```
+Edits in `backend/app` and `frontend/src` reload automatically. After changing `requirements.txt`, `package.json`, or a config file, run the command above again.
 
-On Windows, if `python3` is not available, use:
-
-```console
-python scripts/check_steam_api.py <steamid64>
-```
-
-Your SteamID64 is available from your Steam account details page. The script prints the display name, profile visibility, and owned-game count; if the game library is private, it reports it as hidden.
+| Command | Purpose |
+| --- | --- |
+| `docker compose ps` | List running services |
+| `docker compose logs -f backend` | Follow backend logs |
+| `docker compose down` | Stop everything |
+| `docker compose down -v` | Stop everything and wipe all data |
 
 ## Database and Cache
-On Windows, install WSL 2 **before** Docker Desktop. Confirm Docker works with `docker run hello-world`.
 
-```console
-docker compose up -d     # start Postgres and Redis
-docker compose ps        # check both are healthy
-docker compose down      # stop them
-docker compose down -v   # wipe all data
-```
+Postgres and Redis run only inside Docker. Test both:
 
-Quick tests:
 ```console
 docker compose exec postgres psql -U showdown -d showdown -c "SELECT 1;"
-docker compose exec redis redis-cli ping   # prints PONG
+docker compose exec redis redis-cli ping
 ```
 
-Credentials and ports are read from .env. If port 5432 or 6379 is taken, change POSTGRES_PORT or REDIS_PORT there.
+The Redis test prints `PONG`.
 
 ## Backend
 
-The backend is built with FastAPI and runs on Python 3.12. All commands below should be executed from inside the `backend/` directory.
+The API runs at http://localhost:8000. Service status is at http://localhost:8000/api/health and interactive docs are at http://localhost:8000/docs.
 
-### Environment Setup
-
-Create and activate a Python virtual environment:
-
-**Windows (Command Prompt):**
-```console
-cd backend
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-**macOS/Linux:**
-```console
-cd backend
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### Install Dependencies
+Run the tests:
 
 ```console
-pip install -r requirements.txt
+docker compose exec backend python -m pytest
 ```
 
-### Run the Server
-
-Start Postgres and Redis from the repository root with `docker compose up -d`, then run from `backend/`:
+Check Steam Web API access with a public SteamID64:
 
 ```console
-fastapi dev app/main.py
+docker compose exec backend python scripts/check_steam_api.py <steamid64>
 ```
 
-The API is available at `http://localhost:8000`. Check service status at
-`http://localhost:8000/api/health` and interactive API docs at
-`http://localhost:8000/docs`.
-
-### Run Tests
-
-Run the test suite from `backend/`:
-
-```console
-python -m pytest
-```
+Your SteamID64 is on your Steam account details page. The script prints the display name, profile visibility, and owned-game count, or reports the library as hidden if it is private.
 
 ## Frontend
-Requires Node.js 24.
 
-From the repository root, install dependencies:
+The app runs at http://localhost:3000.
 
-```console
-cd frontend
-npm install
-```
-
-Create the frontend's local environment file:
+Run lint checks:
 
 ```console
-# macOS/Linux
-cp .env.example .env.local
-
-# Windows PowerShell
-Copy-Item .env.example .env.local
+docker compose exec frontend npm run lint
 ```
-
-The default backend URL in `.env.local` is:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-Start the frontend:
-
-```console
-npm run dev
-```
-
-Open http://localhost:3000.
-
-The home page displays backend service statuses and refreshes every
-10 seconds. If the backend cannot be reached, it displays
-"Backend unreachable".
-
-Run lint checks from the frontend directory:
-
-```console
-npm run lint
-```
-
-On Windows PowerShell, use `npm.cmd` instead of `npm` if script
-execution is blocked.
