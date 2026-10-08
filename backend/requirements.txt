@@ -3,3 +3,5 @@ pydantic-settings
 psycopg[binary]
 redis
 pytest
+sqlalchemy
+alembic
