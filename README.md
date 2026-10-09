@@ -93,6 +93,15 @@ Run the tests:
 docker compose exec backend python -m pytest
 ```
 
+Database migrations run when the backend starts. After changing a model in `backend/app/models`, create a migration and apply it:
+
+```console
+docker compose exec backend alembic revision --autogenerate -m "describe the change"
+docker compose exec backend alembic upgrade head
+```
+
+Review the new file in `backend/alembic/versions` before committing it.
+
 Check Steam Web API access with a public SteamID64:
 
 ```console
