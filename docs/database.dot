@@ -1,0 +1,68 @@
+digraph database {
+    graph [rankdir=LR, bgcolor="white", pad="0.4", nodesep="0.5", ranksep="1.1", splines=spline];
+    node [shape=plain, fontname="Helvetica,Arial,sans-serif", fontsize="11"];
+    edge [dir=both, arrowtail=teetee, arrowhead=crowodot, color="#5b6b7c", penwidth="1.2"];
+
+    players [label=<
+        <table border="1" cellborder="1" cellspacing="0" cellpadding="5" color="#c3ccd6">
+            <tr><td colspan="3" bgcolor="#24476b" cellpadding="7"><font color="#ffffff"><b>players</b></font></td></tr>
+            <tr><td port="steam_id_l" align="left">steam_id</td><td align="left"><font color="#5b6b7c">bigint</font></td><td port="steam_id_r" align="center"><font color="#24476b"><b>PK</b></font></td></tr>
+            <tr><td port="persona_name_l" align="left">persona_name</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="persona_name_r" align="center"></td></tr>
+            <tr><td port="avatar_url_l" align="left">avatar_url</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="avatar_url_r" align="center"></td></tr>
+            <tr><td port="profile_url_l" align="left">profile_url</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="profile_url_r" align="center"></td></tr>
+            <tr><td port="visibility_l" align="left">visibility</td><td align="left"><font color="#5b6b7c">smallint</font></td><td port="visibility_r" align="center"></td></tr>
+            <tr><td port="updated_at_l" align="left">updated_at</td><td align="left"><font color="#5b6b7c">timestamptz</font></td><td port="updated_at_r" align="center"></td></tr>
+        </table>
+    >];
+
+    games [label=<
+        <table border="1" cellborder="1" cellspacing="0" cellpadding="5" color="#c3ccd6">
+            <tr><td colspan="3" bgcolor="#24476b" cellpadding="7"><font color="#ffffff"><b>games</b></font></td></tr>
+            <tr><td port="app_id_l" align="left">app_id</td><td align="left"><font color="#5b6b7c">int</font></td><td port="app_id_r" align="center"><font color="#24476b"><b>PK</b></font></td></tr>
+            <tr><td port="name_l" align="left">name</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="name_r" align="center"></td></tr>
+            <tr><td port="icon_url_l" align="left">icon_url</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="icon_url_r" align="center"></td></tr>
+            <tr><td port="has_achievements_l" align="left">has_achievements</td><td align="left"><font color="#5b6b7c">boolean</font></td><td port="has_achievements_r" align="center"></td></tr>
+            <tr><td port="updated_at_l" align="left">updated_at</td><td align="left"><font color="#5b6b7c">timestamptz</font></td><td port="updated_at_r" align="center"></td></tr>
+        </table>
+    >];
+
+    player_games [label=<
+        <table border="1" cellborder="1" cellspacing="0" cellpadding="5" color="#c3ccd6">
+            <tr><td colspan="3" bgcolor="#24476b" cellpadding="7"><font color="#ffffff"><b>player_games</b></font></td></tr>
+            <tr><td port="steam_id_l" align="left">steam_id</td><td align="left"><font color="#5b6b7c">bigint</font></td><td port="steam_id_r" align="center"><font color="#24476b"><b>PK FK</b></font></td></tr>
+            <tr><td port="app_id_l" align="left">app_id</td><td align="left"><font color="#5b6b7c">int</font></td><td port="app_id_r" align="center"><font color="#24476b"><b>PK FK</b></font></td></tr>
+            <tr><td port="playtime_minutes_l" align="left">playtime_minutes</td><td align="left"><font color="#5b6b7c">int</font></td><td port="playtime_minutes_r" align="center"></td></tr>
+            <tr><td port="recent_playtime_minutes_l" align="left">recent_playtime_minutes</td><td align="left"><font color="#5b6b7c">int</font></td><td port="recent_playtime_minutes_r" align="center"></td></tr>
+            <tr><td port="last_played_at_l" align="left">last_played_at</td><td align="left"><font color="#5b6b7c">timestamptz</font></td><td port="last_played_at_r" align="center"></td></tr>
+        </table>
+    >];
+
+    achievements [label=<
+        <table border="1" cellborder="1" cellspacing="0" cellpadding="5" color="#c3ccd6">
+            <tr><td colspan="3" bgcolor="#24476b" cellpadding="7"><font color="#ffffff"><b>achievements</b></font></td></tr>
+            <tr><td port="app_id_l" align="left">app_id</td><td align="left"><font color="#5b6b7c">int</font></td><td port="app_id_r" align="center"><font color="#24476b"><b>PK FK</b></font></td></tr>
+            <tr><td port="api_name_l" align="left">api_name</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="api_name_r" align="center"><font color="#24476b"><b>PK</b></font></td></tr>
+            <tr><td port="display_name_l" align="left">display_name</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="display_name_r" align="center"></td></tr>
+            <tr><td port="description_l" align="left">description</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="description_r" align="center"></td></tr>
+            <tr><td port="icon_url_l" align="left">icon_url</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="icon_url_r" align="center"></td></tr>
+            <tr><td port="hidden_l" align="left">hidden</td><td align="left"><font color="#5b6b7c">boolean</font></td><td port="hidden_r" align="center"></td></tr>
+        </table>
+    >];
+
+    player_achievements [label=<
+        <table border="1" cellborder="1" cellspacing="0" cellpadding="5" color="#c3ccd6">
+            <tr><td colspan="3" bgcolor="#24476b" cellpadding="7"><font color="#ffffff"><b>player_achievements</b></font></td></tr>
+            <tr><td port="steam_id_l" align="left">steam_id</td><td align="left"><font color="#5b6b7c">bigint</font></td><td port="steam_id_r" align="center"><font color="#24476b"><b>PK FK</b></font></td></tr>
+            <tr><td port="app_id_l" align="left">app_id</td><td align="left"><font color="#5b6b7c">int</font></td><td port="app_id_r" align="center"><font color="#24476b"><b>PK FK</b></font></td></tr>
+            <tr><td port="api_name_l" align="left">api_name</td><td align="left"><font color="#5b6b7c">varchar</font></td><td port="api_name_r" align="center"><font color="#24476b"><b>PK FK</b></font></td></tr>
+            <tr><td port="achieved_l" align="left">achieved</td><td align="left"><font color="#5b6b7c">boolean</font></td><td port="achieved_r" align="center"></td></tr>
+            <tr><td port="unlocked_at_l" align="left">unlocked_at</td><td align="left"><font color="#5b6b7c">timestamptz</font></td><td port="unlocked_at_r" align="center"></td></tr>
+        </table>
+    >];
+
+    players:steam_id_r:e -> player_games:steam_id_l:w;
+    games:app_id_r:e -> player_games:app_id_l:w;
+    games:app_id_r:e -> achievements:app_id_l:w;
+    players:steam_id_r:e -> player_achievements:steam_id_l:w;
+    achievements:api_name_r:e -> player_achievements:api_name_l:w;
+}

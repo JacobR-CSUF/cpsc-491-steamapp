@@ -2,56 +2,7 @@
 
 PostgreSQL stores Steam data for the backend. Models live in `backend/app/models`, and migrations live in `backend/alembic/versions`.
 
-```mermaid
-erDiagram
-    players ||--o{ player_games : owns
-    games ||--o{ player_games : "appears in"
-    games ||--o{ achievements : defines
-    players ||--o{ player_achievements : earns
-    achievements ||--o{ player_achievements : "tracked in"
-
-    players {
-        bigint steam_id PK
-        varchar persona_name
-        varchar avatar_url
-        varchar profile_url
-        smallint visibility
-        timestamptz updated_at
-    }
-
-    games {
-        int app_id PK
-        varchar name
-        varchar icon_url
-        boolean has_achievements
-        timestamptz updated_at
-    }
-
-    player_games {
-        bigint steam_id PK, FK
-        int app_id PK, FK
-        int playtime_minutes
-        int recent_playtime_minutes
-        timestamptz last_played_at
-    }
-
-    achievements {
-        int app_id PK, FK
-        varchar api_name PK
-        varchar display_name
-        varchar description
-        varchar icon_url
-        boolean hidden
-    }
-
-    player_achievements {
-        bigint steam_id PK, FK
-        int app_id PK, FK
-        varchar api_name PK, FK
-        boolean achieved
-        timestamptz unlocked_at
-    }
-```
+![Database schema](database.png)
 
 ## Tables
 
@@ -87,7 +38,13 @@ erDiagram
    docker compose exec backend alembic upgrade head
    ```
 
-5. Commit the model change and the migration together.
+5. Update `docs/database.dot` and regenerate the diagram with [Graphviz](https://graphviz.org/download/):
+
+   ```console
+   dot -Tpng -Gdpi=150 docs/database.dot -o docs/database.png
+   ```
+
+6. Commit the model change, the migration, and the diagram together.
 
 ## Rules
 
