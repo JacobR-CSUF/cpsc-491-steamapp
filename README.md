@@ -83,6 +83,11 @@ docker compose exec redis redis-cli ping
 
 The Redis test prints `PONG`.
 
+To clear cached Steam data (this wipes everything in Redis):
+```console
+docker compose exec redis redis-cli FLUSHALL
+```
+
 ## Backend
 
 The API runs at http://localhost:8000. Service status is at http://localhost:8000/api/health and interactive docs are at http://localhost:8000/docs.
