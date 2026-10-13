@@ -24,7 +24,7 @@ def _unique_urls(values: list[str]) -> list[str]:
 
 
 def fetch_from_api(steam_id: str, app_id: int) -> list[str]:
-    """Fetch screenshot preview URLs through the Steam Web API."""
+    """Fetch screenshot file URLs through the Steam Web API."""
     data = request_steam(
         "IPublishedFileService",
         "GetUserFiles",
@@ -46,11 +46,11 @@ def fetch_from_api(steam_id: str, app_id: int) -> list[str]:
         raise SteamApiError("Steam returned an invalid screenshot list.")
 
     urls = [
-        item["preview_url"]
+        item["file_url"]
         for item in details
         if isinstance(item, dict)
-        and isinstance(item.get("preview_url"), str)
-        and item["preview_url"]
+        and isinstance(item.get("file_url"), str)
+        and item["file_url"]
     ]
     return _unique_urls(urls)
 
