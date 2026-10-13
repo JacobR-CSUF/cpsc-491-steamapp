@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.controllers.health import router as health_router
 from app.controllers.players import router as players_router
+from app.controllers.screenshots import router as screenshots_router
 from app.core.config import get_settings
 
 def create_app() -> FastAPI:
@@ -18,6 +19,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health_router)
     app.include_router(players_router)
+    app.include_router(screenshots_router)
     return app
 
 app = create_app()
