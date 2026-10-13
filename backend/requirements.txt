@@ -5,3 +5,4 @@ redis
 pytest
 sqlalchemy
 alembic
+beautifulsoup4
