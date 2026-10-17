@@ -118,9 +118,15 @@ def get_owned_games(steam_id: str) -> list[dict[str, Any]]:
     )
 
     response = data.get("response", {})
-    games = response.get("games") if isinstance(response, dict) else None
-    if games is None:
+    if not isinstance(response, dict):
+        raise SteamApiError("Steam API returned an invalid owned-games response.")
+
+    if not response:
         raise PrivateProfileError("Steam game details are private.")
+
+    games = response.get("games")
+    if games is None:
+        return []
     if not isinstance(games, list):
         raise SteamApiError("Steam API returned an invalid games list.")
 
