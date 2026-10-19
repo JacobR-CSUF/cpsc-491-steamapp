@@ -4,6 +4,8 @@ from app.controllers.health import router as health_router
 from app.controllers.players import router as players_router
 from app.controllers.screenshots import router as screenshots_router
 from app.core.config import get_settings
+from app.controllers.achievements import router as achievements_router
+
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Steam-User Showdown")
@@ -20,6 +22,8 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(players_router)
     app.include_router(screenshots_router)
+    app.include_router(achievements_router) # Include the achievements router to handle achievement-related API endpoints
     return app
 
 app = create_app()
+

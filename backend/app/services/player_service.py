@@ -57,6 +57,8 @@ def sync_library(db: Session, steam_id: str) -> Player | None:
                 "https://media.steampowered.com/steamcommunity/public/images/apps/"
                 f"{app_id}/{icon_hash}.jpg" if icon_hash else None
             ),
+            # KAN-34: Steam flags games that have a stats/achievements page.
+            "has_achievements": bool(game.get("has_community_visible_stats", False)),
         })
         player_games.append({
             "steam_id": int(steam_id),
@@ -76,6 +78,7 @@ def sync_library(db: Session, steam_id: str) -> Player | None:
             set_={
                 "name": stmt.excluded.name,
                 "icon_url": stmt.excluded.icon_url,
+                "has_achievements": stmt.excluded.has_achievements,
                 "updated_at": func.now(),
             },
         ))
