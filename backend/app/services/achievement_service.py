@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 from app.models import Achievement, Game, Player, PlayerAchievement, PlayerGame
 from app.schemas.achievement import GameProgressOut
 from app.services import player_service, steam_data
-from app.services.steam_client import PrivateProfileError
+from app.services.steam_client import SteamApiError
 
 
 class SyncResult(NamedTuple):
@@ -120,11 +120,11 @@ def sync_achievements(db: Session, steam_id: str) -> SyncResult:
     synced = skipped = 0
     for app_id in played_games_with_achievements(db, steam_id): #
         # Sync the game's achievement definitions and the player's progress for that game,
-        # handling any PrivateProfileError exceptions that may occur
+        # handling any SteamApiError exceptions that may occur
         try:
             sync_game_schema(db, app_id)
             sync_player_game(db, steam_id, app_id)
-        except PrivateProfileError:
+        except SteamApiError:
             db.rollback()
             skipped += 1
         else:
