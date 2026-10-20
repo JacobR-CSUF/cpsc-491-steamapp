@@ -14,7 +14,7 @@ from app.db.session import SessionLocal
 from app.main import app
 from app.models import Achievement, Game, Player, PlayerAchievement
 from app.services import achievement_service, steam_data
-from app.services.steam_client import PrivateProfileError
+from app.services.steam_client import PrivateProfileError, SteamApiError
 
 STEAM_ID = "76561199999999998" # A test Steam ID that is NOT a real user.
 APP_IDS = [-34001, -34002, -34003, -34004, -34005]
@@ -185,3 +185,17 @@ def test_read_achievements_private_returns_403(client, monkeypatch):
 def test_read_achievements_missing_player_returns_404(client, monkeypatch):
     monkeypatch.setattr(steam_data, "get_player_summary", lambda steam_id: None)
     assert client.get(f"/api/players/{STEAM_ID}/achievements").status_code == 404
+
+
+def test_sync_skips_game_steam_fails_on(monkeypatch):
+    def failing_achievements(steam_id, app_id):
+        if app_id == ALPHA:
+            raise SteamApiError("Steam API returned HTTP 500: Internal server error", status_code=500)
+        return fake_player_achievements(steam_id, app_id)
+
+    monkeypatch.setattr(steam_data, "get_player_achievements", failing_achievements)
+    with SessionLocal() as db:
+        achievement_service.sync_player_data(db, STEAM_ID)
+        result = achievement_service.sync_achievements(db, STEAM_ID)
+
+    assert result == (1, 2)
