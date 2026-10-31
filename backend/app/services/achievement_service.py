@@ -16,7 +16,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.models import Achievement, Game, Player, PlayerAchievement, PlayerGame
-from app.schemas.achievement import GameProgressOut
+from app.schemas.achievement import AchievementOut, GameProgressOut
 from app.services import player_service, steam_data
 from app.services.steam_client import SteamApiError
 
@@ -167,3 +167,66 @@ def get_achievement_progress(db: Session, steam_id: str) -> list[GameProgressOut
         .order_by(Game.app_id)
     )
     return [GameProgressOut.model_validate(row) for row in db.execute(stmt).mappings()]
+
+
+# KAN-42: Every achievement in one game's schema, with the player's unlock status.
+def get_game_achievements(
+    db: Session, steam_id: str, app_id: int
+) -> list[AchievementOut] | None:
+    """Return a game's achievements with the player's progress.
+
+    Unlocked ones come first, newest first, then locked ones by name.
+    Returns None when the player doesn't own the game.
+    """
+    owned = db.get(PlayerGame, (int(steam_id), app_id))
+    if owned is None:
+        return None
+
+    # Left join so achievements without a saved progress row still show up as locked.
+    stmt = (
+        select(
+            Achievement.api_name,
+            Achievement.display_name,
+            Achievement.description,
+            Achievement.icon_url,
+            Achievement.hidden,
+            PlayerAchievement.achieved,
+            PlayerAchievement.unlocked_at,
+        )
+        .outerjoin(
+            PlayerAchievement,
+            (PlayerAchievement.app_id == Achievement.app_id)
+            & (PlayerAchievement.api_name == Achievement.api_name)
+            & (PlayerAchievement.steam_id == int(steam_id)),
+        )
+        .where(Achievement.app_id == app_id)
+    )
+    rows = [
+        AchievementOut(
+            api_name=row["api_name"],
+            display_name=row["display_name"],
+            description=row["description"],
+            icon_url=row["icon_url"],
+            hidden=bool(row["hidden"]),
+            achieved=bool(row["achieved"]),  # None (no progress row) means locked
+            unlocked_at=row["unlocked_at"],
+        )
+        for row in db.execute(stmt).mappings()
+    ]
+
+    # Sorted in Python so the order doesn't depend on how the database sorts NULLs.
+    # An unlocked achievement with no date (Steam sent 0) goes last among the unlocked.
+    unlocked = sorted(
+        (a for a in rows if a.achieved),
+        key=lambda a: (
+            a.unlocked_at is None,
+            -a.unlocked_at.timestamp() if a.unlocked_at else 0,
+            a.display_name.lower(),
+            a.api_name,
+        ),
+    )
+    locked = sorted(
+        (a for a in rows if not a.achieved),
+        key=lambda a: (a.display_name.lower(), a.api_name),
+    )
+    return unlocked + locked
