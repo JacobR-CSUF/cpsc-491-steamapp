@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.steam_id import STEAM_ID_PATTERN
 from app.db.session import get_db
 from app.schemas.comparison import ComparisonOut
-from app.services import comparison_service, profile_status
+from app.services import comparison_service, history_service, profile_status
 from app.services.profile_status import ProfileStatus, STATUS_MESSAGES
 from app.services.steam_client import PrivateProfileError, SteamApiError
 
@@ -30,7 +30,9 @@ def read_comparison(
                     status_code=404 if status == ProfileStatus.not_found else 403,
                     detail=STATUS_MESSAGES[status],
                 )
-        return comparison_service.compare_players(db, player_a, player_b)
+        comparison = comparison_service.compare_players(db, player_a, player_b)
+        history_service.record_comparison(db, player_a, player_b)
+        return comparison
     except comparison_service.ComparisonProfileError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except PrivateProfileError as exc:
