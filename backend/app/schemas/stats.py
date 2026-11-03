@@ -10,6 +10,8 @@ class PlayerStatsOut(BaseModel):
     steam_id: str
     games_owned: int
     games_played: int
+    account_value_cents: int
+    currency: str
     achievements_unlocked: int
     achievements_available: int
     completion_rate: float

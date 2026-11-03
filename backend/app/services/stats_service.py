@@ -5,6 +5,9 @@ from app.models import PlayerGame
 from app.schemas.achievement import GameProgressOut
 from app.schemas.stats import CompletedGameOut, PlayerStatsOut
 from app.services.achievement_service import get_achievement_progress
+from app.services import store_prices
+
+ACCOUNT_CURRENCY = "USD"
 
 
 def achievement_totals(progress: list[GameProgressOut]) -> tuple[int, int]:
@@ -36,6 +39,15 @@ def library_counts(db: Session, steam_id: str) -> tuple[int, int]:
     return owned, played
 
 
+def account_value(db: Session, steam_id: str) -> int:
+    app_ids = db.scalars(
+        select(PlayerGame.app_id).where(PlayerGame.steam_id == int(steam_id))
+    ).all()
+    if not app_ids:
+        return 0
+    return sum(store_prices.get_prices(app_ids).values())
+
+
 def player_stats(db: Session, steam_id: str) -> PlayerStatsOut:
     progress = get_achievement_progress(db, steam_id)
     unlocked, available = achievement_totals(progress)
@@ -44,6 +56,8 @@ def player_stats(db: Session, steam_id: str) -> PlayerStatsOut:
         steam_id=steam_id,
         games_owned=owned,
         games_played=played,
+        account_value_cents=account_value(db, steam_id),
+        currency=ACCOUNT_CURRENCY,
         achievements_unlocked=unlocked,
         achievements_available=available,
         completion_rate=completion_rate(unlocked, available),

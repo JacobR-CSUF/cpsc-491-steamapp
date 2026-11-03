@@ -8,7 +8,7 @@ from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
 from app.models import Achievement, Game, Player, PlayerAchievement, PlayerGame
-from app.services import achievement_service, comparison_service, profile_status
+from app.services import achievement_service, comparison_service, profile_status, store_prices
 from app.services.profile_status import ProfileStatus, STATUS_MESSAGES
 from app.services.steam_client import PrivateProfileError, SteamApiError
 
@@ -78,6 +78,8 @@ def db():
 @pytest.fixture
 def client(db, monkeypatch):
     monkeypatch.setattr(profile_status, "get_profile_status", lambda _: ProfileStatus.public)
+    monkeypatch.setattr(store_prices, "get_prices",
+                        lambda app_ids: {app_id: 1000 for app_id in app_ids})
     monkeypatch.setattr(achievement_service, "sync_player_data",
                         lambda db, steam_id: db.get(Player, int(steam_id)))
 
@@ -131,12 +133,14 @@ def test_read_comparison(client, monkeypatch):
     data = response.json()
     assert data["player_a"] == {
         "steam_id": PLAYER_A, "games_owned": 4, "games_played": 4,
+        "account_value_cents": 4000, "currency": "USD",
         "achievements_unlocked": 3, "achievements_available": 4,
         "completion_rate": 75.0,
         "completed_games": [{"app_id": A_ONLY, "name": "A only"}],
     }
     assert data["player_b"] == {
         "steam_id": PLAYER_B, "games_owned": 4, "games_played": 4,
+        "account_value_cents": 4000, "currency": "USD",
         "achievements_unlocked": 2, "achievements_available": 4,
         "completion_rate": 50.0,
         "completed_games": [{"app_id": B_ONLY, "name": "B only"}],
