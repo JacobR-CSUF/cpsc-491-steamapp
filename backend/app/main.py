@@ -8,6 +8,7 @@ from app.controllers.achievements import router as achievements_router
 from app.controllers.stats import router as stats_router
 from app.controllers.comparisons import router as comparisons_router
 from app.controllers.game_details import router as game_details_router
+from app.controllers.advanced import router as advanced_router
 
 
 def create_app() -> FastAPI:
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(stats_router)
     app.include_router(comparisons_router)
     app.include_router(game_details_router)
+    app.include_router(advanced_router)
     return app
 
 app = create_app()

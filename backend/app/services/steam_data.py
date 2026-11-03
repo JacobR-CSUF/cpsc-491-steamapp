@@ -42,3 +42,11 @@ def get_game_schema(app_id): # returns a dictionary with the game's schema, incl
         ONE_DAY,
         lambda: steam_client.get_game_schema(app_id), # fetches the game's schema from the Steam API if it's not in the cache
     )
+
+
+def get_global_percentages(app_id): # returns {api_name: percent} with the share of all Steam players who unlocked each achievement
+    return cached(
+        f"steam:global:{app_id}",
+        ONE_DAY,
+        lambda: steam_client.get_global_percentages(app_id), # fetches the global unlock percentages from the Steam API if they're not in the cache
+    )
