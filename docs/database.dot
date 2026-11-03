@@ -60,6 +60,18 @@ digraph database {
         </table>
     >];
 
+    comparisons [label=<
+        <table border="1" cellborder="1" cellspacing="0" cellpadding="5" color="#c3ccd6">
+            <tr><td colspan="3" bgcolor="#24476b" cellpadding="7"><font color="#ffffff"><b>comparisons</b></font></td></tr>
+            <tr><td align="left">id</td><td align="left"><font color="#5b6b7c">int</font></td><td align="center"><font color="#24476b"><b>PK</b></font></td></tr>
+            <tr><td port="player_a_id_l" align="left">player_a_id</td><td align="left"><font color="#5b6b7c">bigint</font></td><td align="center"><font color="#24476b"><b>FK</b></font></td></tr>
+            <tr><td port="player_b_id_l" align="left">player_b_id</td><td align="left"><font color="#5b6b7c">bigint</font></td><td align="center"><font color="#24476b"><b>FK</b></font></td></tr>
+            <tr><td align="left">compared_at</td><td align="left"><font color="#5b6b7c">timestamptz</font></td><td align="center"></td></tr>
+        </table>
+    >];
+
+    players:steam_id_r:e -> comparisons:player_a_id_l:w;
+    players:steam_id_r:e -> comparisons:player_b_id_l:w;
     players:steam_id_r:e -> player_games:steam_id_l:w;
     games:app_id_r:e -> player_games:app_id_l:w;
     games:app_id_r:e -> achievements:app_id_l:w;
