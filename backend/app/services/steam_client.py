@@ -183,3 +183,31 @@ def get_game_schema(app_id: int | str) -> list[dict[str, Any]]:
 
     achievements = available_stats.get("achievements", [])
     return achievements if isinstance(achievements, list) else []
+
+
+def get_global_percentages(app_id: int | str) -> dict[str, float]:
+    """Return each achievement's global unlock percent as {api_name: percent}."""
+    data = request_steam(
+        "ISteamUserStats",
+        "GetGlobalAchievementPercentagesForApp",
+        "v2",
+        {"gameid": app_id},
+    )
+
+    container = data.get("achievementpercentages", {})
+    if not isinstance(container, dict):
+        return {}
+
+    achievements = container.get("achievements", [])
+    if not isinstance(achievements, list):
+        return {}
+
+    percentages = {}
+    for item in achievements:
+        if not isinstance(item, dict) or not isinstance(item.get("name"), str):
+            continue
+        try:
+            percentages[item["name"]] = float(item.get("percent", 0))
+        except (TypeError, ValueError):
+            continue
+    return percentages
