@@ -6,7 +6,7 @@
   unlocked newest first, then locked by name.
 '''
 
-from datetime import datetime
+from datetime import date, datetime, timezone
 
 import pytest
 from fastapi.testclient import TestClient
@@ -20,11 +20,13 @@ from app.main import app
 from app.models import Achievement, Game, Player, PlayerAchievement, PlayerGame
 from app.services import achievement_service
 
-STEAM_ID = "76561199999999990" # Test player's Steam ID
-APP_ID = 990042001             # Test game's App ID
-UNOWNED_APP_ID = 990042002     # Unowned game's App ID
-EARLIER = datetime(2026, 10, 1, 12) # Earlier unlock date for a test achievement
-LATEST = datetime(2026, 10, 2, 12)  # Latest unlock date for a test achievement
+STEAM_ID = "76561199999999990"
+APP_ID = 990042001
+UNOWNED_APP_ID = 990042002
+SECOND_APP_ID = 990042003
+TODAY = date(2026, 10, 2)  # the timeline tests pretend today is this day
+EARLIER = datetime(2026, 10, 1, 12)
+LATEST = datetime(2026, 10, 2, 12)
 
 
 @pytest.fixture
@@ -51,15 +53,19 @@ def db():
             session.add_all([
                 Game(app_id=APP_ID, name="Test Game", has_achievements=True),
                 Game(app_id=UNOWNED_APP_ID, name="Unowned Game", has_achievements=True),
+                Game(app_id=SECOND_APP_ID, name="Second Game", has_achievements=True),
             ])
             session.flush()
 
-            session.add(PlayerGame(
-                steam_id=int(STEAM_ID),
-                app_id=APP_ID,
-                playtime_minutes=120,
-                recent_playtime_minutes=0,
-            ))
+            session.add_all([
+                PlayerGame(
+                    steam_id=int(STEAM_ID),
+                    app_id=game_id,
+                    playtime_minutes=120,
+                    recent_playtime_minutes=0,
+                )
+                for game_id in (APP_ID, SECOND_APP_ID)
+            ])
             session.add_all([
                 Achievement(
                     app_id=app_id,
@@ -76,6 +82,10 @@ def db():
                     (APP_ID, "ALPHA", "Alpha", "Locked, has progress row", False),
                     (APP_ID, "NO_ROW", "Beta", "Locked, no progress row", False),
                     (UNOWNED_APP_ID, "OTHER", "Other", None, False),
+                    (SECOND_APP_ID, "S_ONE", "S One", None, False),
+                    (SECOND_APP_ID, "S_TWO", "S Two", None, False),
+                    (SECOND_APP_ID, "S_OLD", "S Old", None, False),
+                    (SECOND_APP_ID, "S_LOCKED", "S Locked", None, False),
                 ]
             ])
             session.flush()
@@ -97,6 +107,24 @@ def db():
                     steam_id=int(STEAM_ID), app_id=APP_ID, api_name="ALPHA",
                     achieved=False, unlocked_at=None,
                 ),
+                # Second game: two unlocks on TODAY (the second just before midnight UTC),
+                # one far outside every range, and one locked.
+                PlayerAchievement(
+                    steam_id=int(STEAM_ID), app_id=SECOND_APP_ID, api_name="S_ONE",
+                    achieved=True, unlocked_at=datetime(2026, 10, 2, 0, 5),
+                ),
+                PlayerAchievement(
+                    steam_id=int(STEAM_ID), app_id=SECOND_APP_ID, api_name="S_TWO",
+                    achieved=True, unlocked_at=datetime(2026, 10, 2, 23, 55),
+                ),
+                PlayerAchievement(
+                    steam_id=int(STEAM_ID), app_id=SECOND_APP_ID, api_name="S_OLD",
+                    achieved=True, unlocked_at=datetime(2026, 1, 1, 12),
+                ),
+                PlayerAchievement(
+                    steam_id=int(STEAM_ID), app_id=SECOND_APP_ID, api_name="S_LOCKED",
+                    achieved=False, unlocked_at=None,
+                ),
             ])
             session.commit()
             yield session
@@ -107,6 +135,7 @@ def db():
 @pytest.fixture
 def client(db, monkeypatch):
     # The sync is tested in test_achievements.py, so skip Steam here.
+    monkeypatch.setattr(achievement_service, "_today_utc", lambda: TODAY)
     monkeypatch.setattr(
         achievement_service,
         "sync_player_data",
@@ -162,3 +191,50 @@ def test_achievements_rejects_bad_id(client):
     assert client.get("/api/players/123/achievements").status_code == 422
     assert client.get("/api/players/123/games/1/achievements").status_code == 422
     assert client.get(f"/api/players/{STEAM_ID}/games/0/achievements").status_code == 422
+
+
+def test_timeline_fills_empty_days(client):
+    response = client.get(f"/api/players/{STEAM_ID}/achievements/timeline?days=30")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["days"] == 30
+    assert data["app_id"] is None
+    assert len(data["points"]) == 30
+    assert data["points"][0]["date"] == "2026-09-03"
+    assert data["points"][-1]["date"] == "2026-10-02"
+    by_date = {point["date"]: point["unlocked"] for point in data["points"]}
+    # Oct 1: OLD. Oct 2: NEW plus both second-game unlocks. The Jan 1 unlock is out of range.
+    assert by_date["2026-10-01"] == 1
+    assert by_date["2026-10-02"] == 3
+    assert by_date["2026-09-30"] == 0
+    assert data["total"] == 4
+    # Each range returns that many points, and the default is 30.
+    assert len(client.get(f"/api/players/{STEAM_ID}/achievements/timeline").json()["points"]) == 30
+    assert len(client.get(f"/api/players/{STEAM_ID}/achievements/timeline?days=60").json()["points"]) == 60
+    assert len(client.get(f"/api/players/{STEAM_ID}/achievements/timeline?days=90").json()["points"]) == 90
+
+
+def test_timeline_filters_by_game(client):
+    response = client.get(
+        f"/api/players/{STEAM_ID}/achievements/timeline?days=30&app_id={SECOND_APP_ID}"
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["app_id"] == SECOND_APP_ID
+    assert data["total"] == 2
+    assert len(data["points"]) == 30
+    assert data["points"][-1] == {"date": "2026-10-02", "unlocked": 2}
+    assert data["points"][-2]["unlocked"] == 0
+    # The Jan 1 unlock only appears in a range that reaches back that far.
+    assert all(point["date"] != "2026-01-01" for point in data["points"])
+
+
+def test_timeline_rejects_other_ranges(client):
+    base = f"/api/players/{STEAM_ID}/achievements/timeline"
+
+    assert client.get(f"{base}?days=45").status_code == 422
+    assert client.get(f"{base}?days=0").status_code == 422
+    assert client.get(f"{base}?app_id=0").status_code == 422
+    assert client.get("/api/players/123/achievements/timeline").status_code == 422
