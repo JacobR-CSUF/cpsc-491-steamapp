@@ -53,6 +53,8 @@ Copy-Item .env.example .env
 
 Paste your Steam Web API key after `STEAM_API_KEY=`. Git ignores `.env`. After editing it, run `docker compose up -d` to apply the change.
 
+Paste the team's Gemini API key after `GEMINI_API_KEY=` to enable AI achievement suggestions. Without it, `/api/players/{steam_id}/games/{app_id}/suggestions` returns 503 and everything else still works.
+
 ## Running the Stack
 
 Start or update everything from the repository root:

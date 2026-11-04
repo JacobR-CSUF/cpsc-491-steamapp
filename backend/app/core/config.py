@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql://showdown:showdown@localhost:5432/showdown"
     redis_url: str = "redis://localhost:6379/0"
     steam_api_key: str = ""
+    gemini_api_key: str = ""
     frontend_origin: str = "http://localhost:3000"
 
     model_config = SettingsConfigDict(

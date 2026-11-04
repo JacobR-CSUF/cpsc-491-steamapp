@@ -3,12 +3,15 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Path
+from google.genai import errors as genai_errors
 from sqlalchemy.orm import Session
 
 from app.core.steam_id import SteamIdPath
 from app.db.session import get_db
 from app.schemas.advanced import AdvancedStatsOut
+from app.schemas.suggestions import SuggestionsOut
 from app.services import advanced_stats as advanced_service
+from app.services import ai_suggestions
 from app.services.achievement_service import sync_player_data
 from app.services.steam_client import PrivateProfileError, SteamApiError
 
@@ -40,3 +43,44 @@ def read_advanced_stats(
         )
 
     return stats
+
+
+# KAN-47: AI achievement suggestions.
+@router.get("/{steam_id}/games/{app_id}/suggestions", response_model=SuggestionsOut)
+def read_suggestions(
+    steam_id: SteamIdPath,
+    app_id: Annotated[int, Path(gt=0)],
+    db: Session = Depends(get_db),
+):
+    if not ai_suggestions.has_api_key():
+        raise HTTPException(
+            status_code=503,
+            detail="AI suggestions are unavailable: GEMINI_API_KEY is not set.",
+        )
+
+    try:
+        player = sync_player_data(db, steam_id)
+        result = (
+            ai_suggestions.get_suggestions(db, steam_id, app_id)
+            if player is not None
+            else None
+        )
+    except PrivateProfileError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except SteamApiError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    except genai_errors.APIError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="The Gemini API returned an error.",
+        ) from exc
+    except ai_suggestions.EmptySuggestionsError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    if result is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Player not found or game is not owned.",
+        )
+
+    return result
