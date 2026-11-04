@@ -33,6 +33,7 @@ services:
       DATABASE_URL: postgresql://showdown:showdown@postgres:5432/showdown
       REDIS_URL: redis://redis:6379/0
       STEAM_API_KEY: ${STEAM_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       WATCHFILES_FORCE_POLLING: "true"
     volumes:
       - ./backend:/app
