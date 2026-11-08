@@ -6,3 +6,4 @@ pytest
 sqlalchemy
 alembic
 beautifulsoup4
+google-genai
