@@ -5,6 +5,7 @@
   into Postgres for every played game that has achievements.
 '''
 
+from datetime import date as date_type
 from datetime import datetime
 
 from pydantic import BaseModel
@@ -25,3 +26,20 @@ class AchievementOut(BaseModel):
     hidden: bool                # Whether the achievement is hidden from the player.
     achieved: bool              # Whether the player has achieved the achievement.
     unlocked_at: datetime | None  # The timestamp when the achievement was unlocked by the player.
+
+
+
+# KAN-43: Daily unlock counts for the advanced graphs.
+# Represents a point in time for the achievement timeline,
+# including the date and the number of achievements unlocked on that date.
+class TimelinePointOut(BaseModel):
+    date: date_type
+    unlocked: int
+
+# Represents the timeline of achievements for a specific game,
+# including the total number of achievements and the points in time when achievements were unlocked.
+class AchievementTimelineOut(BaseModel):
+    days: int
+    app_id: int | None
+    total: int
+    points: list[TimelinePointOut]

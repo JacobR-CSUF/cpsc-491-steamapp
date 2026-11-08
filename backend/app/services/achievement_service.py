@@ -8,7 +8,8 @@
 # every played game that has achievements.
 
 
-from datetime import datetime, timezone
+from collections import Counter
+from datetime import date, datetime, time, timedelta, timezone
 from typing import NamedTuple
 
 from sqlalchemy import func, select
@@ -16,7 +17,12 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from app.models import Achievement, Game, Player, PlayerAchievement, PlayerGame
-from app.schemas.achievement import AchievementOut, GameProgressOut
+from app.schemas.achievement import (
+    AchievementOut,
+    AchievementTimelineOut,
+    GameProgressOut,
+    TimelinePointOut,
+)
 from app.services import player_service, steam_data
 from app.services.steam_client import SteamApiError
 
@@ -230,3 +236,51 @@ def get_game_achievements(
         key=lambda a: (a.display_name.lower(), a.api_name),
     )
     return unlocked + locked
+
+
+def _today_utc() -> date:
+    return datetime.now(timezone.utc).date()
+
+
+# KAN-43: Unlock counts per UTC day over the last `days` days, ending today.
+def achievement_timeline(
+    db: Session, steam_id: str, days: int, app_id: int | None = None
+) -> AchievementTimelineOut:
+    """Count the player's unlocks for each of the last `days` UTC days.
+
+    Every day is included, even with 0 unlocks. Pass app_id to limit it to one game.
+    """
+    today = _today_utc()
+    first_day = today - timedelta(days=days - 1)
+    start = datetime.combine(first_day, time.min, tzinfo=timezone.utc)
+    end = datetime.combine(today + timedelta(days=1), time.min, tzinfo=timezone.utc)
+
+    # Filter for the player's unlocked achievements within the specified date range
+    stmt = select(PlayerAchievement.unlocked_at).where(
+        PlayerAchievement.steam_id == int(steam_id),
+        PlayerAchievement.achieved.is_(True),
+        PlayerAchievement.unlocked_at.is_not(None),
+        PlayerAchievement.unlocked_at >= start,
+        PlayerAchievement.unlocked_at < end,
+    )
+    if app_id is not None: #
+        stmt = stmt.where(PlayerAchievement.app_id == app_id)
+
+    # Counted in Python so the UTC day doesn't depend on the database's time zone.
+    counts: Counter[date] = Counter()
+    for unlocked_at in db.scalars(stmt):
+        if unlocked_at.tzinfo is None:  # some databases return naive UTC values
+            unlocked_at = unlocked_at.replace(tzinfo=timezone.utc)
+        counts[unlocked_at.astimezone(timezone.utc).date()] += 1
+
+    points = [
+        TimelinePointOut(date=day, unlocked=counts[day])
+        for day in (first_day + timedelta(days=offset) for offset in range(days))
+    ]
+    return AchievementTimelineOut( # Return an AchievementTimelineOut object containing the timeline of achievement unlocks for the player
+        days=days,
+        app_id=app_id,
+        total=sum(point.unlocked for point in points),
+        points=points,
+    )
+

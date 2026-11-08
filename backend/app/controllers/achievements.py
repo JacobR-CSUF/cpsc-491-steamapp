@@ -6,18 +6,28 @@
    into Postgres for every played game that has achievements.
 '''
 
-from typing import Annotated
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from pydantic import BeforeValidator
 from sqlalchemy.orm import Session
 
 from app.core.steam_id import SteamIdPath
 from app.db.session import get_db
-from app.schemas.achievement import AchievementOut, GameProgressOut
+from app.schemas.achievement import (
+    AchievementOut,
+    AchievementTimelineOut,
+    GameProgressOut,
+)
 from app.services import achievement_service
 from app.services.steam_client import PrivateProfileError, SteamApiError
 
+
 router = APIRouter(prefix="/api/players", tags=["achievements"])
+
+# Query values arrive as text ("30"), and Literal[30, 60, 90] rejects text,
+# so convert to int first. Anything else (45, "abc") still returns 422.
+TimelineDays = Annotated[Literal[30, 60, 90], BeforeValidator(int)]
 
 
 # Default route for getting a player's achievement progress. Syncs the player's data from Steam, then returns progress per game.
@@ -71,3 +81,29 @@ def read_game_achievements( # Get all achievements for a specific game, includin
         )
 
     return achievements
+
+
+# KAN-43: Daily unlock counts for the advanced graphs, for all games or one game.
+@router.get(
+    "/{steam_id}/achievements/timeline",
+    response_model=AchievementTimelineOut,
+)
+def read_achievement_timeline(
+    steam_id: SteamIdPath,
+    days: TimelineDays = 30,
+    app_id: Annotated[int, Query(gt=0)] | None = None,
+    db: Session = Depends(get_db),
+):
+    """Sync the player's data, then return unlock counts per day for the last 30, 60 or 90 days."""
+    try:
+        player = achievement_service.sync_player_data(db, steam_id)
+    except PrivateProfileError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except SteamApiError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    if player is None:
+        raise HTTPException(status_code=404, detail="Steam profile not found.")
+
+    return achievement_service.achievement_timeline(db, steam_id, days, app_id)
+
