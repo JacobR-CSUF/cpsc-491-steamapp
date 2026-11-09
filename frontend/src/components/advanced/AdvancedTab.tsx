@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import GameSelect from "@/components/advanced/GameSelect";
 import { getPlayer } from "@/lib/api";
 import type { SharedGame } from "@/lib/types";
 
@@ -26,8 +27,8 @@ export default function AdvancedTab({ steamIdA, steamIdB, sharedGames }: Advance
   const panelId = useId();
   const [expanded, setExpanded] = useState(false);
 
-  // Selected game. KAN-64's dropdown will change it.
-  const [selectedAppId] = useState<number | undefined>(
+  // Selected game. The KAN-64 dropdown changes it.
+  const [selectedAppId, setSelectedAppId] = useState<number | undefined>(
     () => mostPlayedGame(sharedGames)?.app_id,
   );
   // If the games change (a new comparison), fall back to the new default.
@@ -79,6 +80,11 @@ export default function AdvancedTab({ steamIdA, steamIdB, sharedGames }: Advance
         <div id={panelId} className="rounded-2xl bg-panel p-6 ring-1 ring-white/10">
           {selected ? (
             <div className="space-y-6">
+              <GameSelect
+                games={sharedGames}
+                value={selected.app_id}
+                onChange={setSelectedAppId}
+              />
               <div>
                 <h3 className="text-lg font-semibold tracking-tight text-accent">
                   {selected.name}
