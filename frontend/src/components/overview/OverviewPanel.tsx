@@ -2,6 +2,7 @@
 
 import { useId, useState } from "react";
 import AchievementComparisonCards from "@/components/overview/AchievementComparisonCards";
+import ComparisonCharts from "@/components/overview/ComparisonCharts";
 import StatRow from "@/components/overview/StatRow";
 import { formatCents } from "@/lib/format";
 import type { Comparison, Player } from "@/lib/types";
@@ -65,6 +66,7 @@ export default function OverviewPanel({ comparison, playerA, playerB }: Overview
           </p>
         </div>
         <AchievementComparisonCards comparison={comparison} playerA={playerA} playerB={playerB} />
+        <ComparisonCharts comparison={comparison} playerA={playerA} playerB={playerB} />
       </div>
     </section>
   );
