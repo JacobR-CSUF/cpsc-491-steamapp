@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import AiSuggestionBox from "@/components/advanced/AiSuggestionBox";
 import GameSelect from "@/components/advanced/GameSelect";
 import MissingAchievementsPanel from "@/components/advanced/MissingAchievementsPanel";
 import { getPlayer } from "@/lib/api";
@@ -107,7 +108,9 @@ export default function AdvancedTab({ steamIdA, steamIdB, sharedGames }: Advance
                   name={nameB}
                 />
               </div>
-              {/* KAN-66 and KAN-67 sections go here. */}
+              {/* KAN-66: AI tips for player A. */}
+              <AiSuggestionBox steamId={steamIdA} appId={selected.app_id} name={nameA} />
+              {/* KAN-67 section goes here. */}
             </div>
           ) : (
             <p className="text-sm text-muted">No shared games to analyze</p>
