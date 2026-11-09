@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import AchievementComparisonCards from "@/components/overview/AchievementComparisonCards";
 import ComparisonCharts from "@/components/overview/ComparisonCharts";
+import SharedGamesList from "@/components/overview/SharedGamesList";
 import StatRow from "@/components/overview/StatRow";
 import { formatCents } from "@/lib/format";
 import type { Comparison, Player } from "@/lib/types";
@@ -67,6 +68,7 @@ export default function OverviewPanel({ comparison, playerA, playerB }: Overview
         </div>
         <AchievementComparisonCards comparison={comparison} playerA={playerA} playerB={playerB} />
         <ComparisonCharts comparison={comparison} playerA={playerA} playerB={playerB} />
+        <SharedGamesList comparison={comparison} steamIdA={playerA.steam_id} steamIdB={playerB.steam_id} />
       </div>
     </section>
   );
