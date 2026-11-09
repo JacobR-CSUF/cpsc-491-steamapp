@@ -2,6 +2,8 @@
 
 import { useId, useState } from "react";
 import AchievementComparisonCards from "@/components/overview/AchievementComparisonCards";
+import AchievementDetailCard from "@/components/overview/AchievementDetailCard";
+import type { AchievementSelection } from "@/components/overview/AchievementIcon";
 import ComparisonCharts from "@/components/overview/ComparisonCharts";
 import SharedGamesList from "@/components/overview/SharedGamesList";
 import StatRow from "@/components/overview/StatRow";
@@ -16,6 +18,7 @@ interface OverviewPanelProps {
 
 export default function OverviewPanel({ comparison, playerA, playerB }: OverviewPanelProps) {
   const [expanded, setExpanded] = useState(true);
+  const [selectedAchievement, setSelectedAchievement] = useState<AchievementSelection | null>(null);
   const panelId = useId();
   const titleId = useId();
   const statsA = comparison.player_a;
@@ -68,8 +71,11 @@ export default function OverviewPanel({ comparison, playerA, playerB }: Overview
         </div>
         <AchievementComparisonCards comparison={comparison} playerA={playerA} playerB={playerB} />
         <ComparisonCharts comparison={comparison} playerA={playerA} playerB={playerB} />
-        <SharedGamesList comparison={comparison} steamIdA={playerA.steam_id} steamIdB={playerB.steam_id} />
+        <SharedGamesList comparison={comparison} steamIdA={playerA.steam_id} steamIdB={playerB.steam_id} onSelect={setSelectedAchievement} />
       </div>
+      {selectedAchievement && (
+        <AchievementDetailCard {...selectedAchievement} nameA={playerA.persona_name} nameB={playerB.persona_name} onClose={() => setSelectedAchievement(null)} />
+      )}
     </section>
   );
 }
