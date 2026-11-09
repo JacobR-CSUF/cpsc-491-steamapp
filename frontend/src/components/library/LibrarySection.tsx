@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import GameDetailModal from "@/components/library/GameDetailModal";
 import GameTile from "@/components/library/GameTile";
 import { ApiError, getLibrary, getPlayer } from "@/lib/api";
 import type { OwnedGame } from "@/lib/types";
@@ -36,7 +37,7 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
   const [attempt, setAttempt] = useState(0);
   const [query, setQuery] = useState("");
   const [shown, setShown] = useState(INITIAL_COUNT);
-  // The game the user clicked. KAN-59 opens its details from this.
+  // The game the user clicked. Its details open in GameDetailModal.
   const [selectedAppId, setSelectedAppId] = useState<number | null>(null);
   // Libraries already requested, so switching tabs doesn't fetch them again.
   const requested = useRef(new Set<string>());
@@ -215,7 +216,13 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
           {body}
         </div>
       </div>
+      {selectedAppId !== null && (
+        <GameDetailModal
+          steamId={selectedId}
+          appId={selectedAppId}
+          onClose={() => setSelectedAppId(null)}
+        />
+      )}
     </section>
   );
 }
-
