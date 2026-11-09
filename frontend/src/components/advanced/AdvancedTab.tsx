@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import GameSelect from "@/components/advanced/GameSelect";
+import MissingAchievementsPanel from "@/components/advanced/MissingAchievementsPanel";
 import { getPlayer } from "@/lib/api";
 import type { SharedGame } from "@/lib/types";
 
@@ -93,7 +94,20 @@ export default function AdvancedTab({ steamIdA, steamIdB, sharedGames }: Advance
                   {nameA} vs {nameB}
                 </p>
               </div>
-              {/* KAN-64 to KAN-67 sections go here. */}
+              {/* KAN-65: ratio and missing achievements, one panel per player. */}
+              <div className="grid gap-6 md:grid-cols-2">
+                <MissingAchievementsPanel
+                  steamId={steamIdA}
+                  appId={selected.app_id}
+                  name={nameA}
+                />
+                <MissingAchievementsPanel
+                  steamId={steamIdB}
+                  appId={selected.app_id}
+                  name={nameB}
+                />
+              </div>
+              {/* KAN-66 and KAN-67 sections go here. */}
             </div>
           ) : (
             <p className="text-sm text-muted">No shared games to analyze</p>
