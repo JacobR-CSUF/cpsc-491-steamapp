@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import AiSuggestionBox from "@/components/advanced/AiSuggestionBox";
 import GameSelect from "@/components/advanced/GameSelect";
 import MissingAchievementsPanel from "@/components/advanced/MissingAchievementsPanel";
+import TimelineChart from "@/components/advanced/TimelineChart";
 import { getPlayer } from "@/lib/api";
 import type { SharedGame } from "@/lib/types";
 
@@ -110,7 +111,14 @@ export default function AdvancedTab({ steamIdA, steamIdB, sharedGames }: Advance
               </div>
               {/* KAN-66: AI tips for player A. */}
               <AiSuggestionBox steamId={steamIdA} appId={selected.app_id} name={nameA} />
-              {/* KAN-67 section goes here. */}
+              {/* KAN-67: 30/60/90-day achievement activity for both players. */}
+              <TimelineChart
+                steamIdA={steamIdA}
+                steamIdB={steamIdB}
+                appId={selected.app_id}
+                nameA={nameA}
+                nameB={nameB}
+              />
             </div>
           ) : (
             <p className="text-sm text-muted">No shared games to analyze</p>
