@@ -39,6 +39,7 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
   const [shown, setShown] = useState(INITIAL_COUNT);
   // The game the user clicked. Its details open in GameDetailModal.
   const [selectedAppId, setSelectedAppId] = useState<number | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   // Libraries already requested, so switching tabs doesn't fetch them again.
   const requested = useRef(new Set<string>());
 
@@ -90,7 +91,22 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
   const visible = filtered.slice(0, shown);
   const remaining = filtered.length - visible.length;
 
+  // Close the modal and put focus back on the tile that opened it, without
+  // scrolling, so the library stays exactly where the user left it.
+  function closeModal() {
+    const appId = selectedAppId;
+    setSelectedAppId(null);
+    if (appId === null) return;
+    requestAnimationFrame(() => {
+      panelRef.current
+        ?.querySelector<HTMLElement>(`[data-app-id="${appId}"]`)
+        ?.focus({ preventScroll: true });
+    });
+  }
+
   function selectSide(next: Side) {
+    // The open game belongs to the player who was showing, so close it.
+    setSelectedAppId(null);
     setSide(next);
     setShown(INITIAL_COUNT);
   }
@@ -212,7 +228,12 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
             />
           </div>
         </div>
-        <div role="tabpanel" id="library-panel" aria-labelledby={`library-tab-${side}`}>
+        <div
+          ref={panelRef}
+          role="tabpanel"
+          id="library-panel"
+          aria-labelledby={`library-tab-${side}`}
+        >
           {body}
         </div>
       </div>
@@ -220,7 +241,7 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
         <GameDetailModal
           steamId={selectedId}
           appId={selectedAppId}
-          onClose={() => setSelectedAppId(null)}
+          onClose={closeModal}
         />
       )}
     </section>
