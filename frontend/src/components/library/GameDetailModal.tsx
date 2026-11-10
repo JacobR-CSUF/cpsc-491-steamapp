@@ -2,9 +2,11 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import StatusMessage from "@/components/compare/StatusMessage";
 import { ApiError, getGameDetail } from "@/lib/api";
+import PlaytimeGraph from "@/components/library/PlaytimeGraph";
 import ScreenshotGallery from "@/components/library/ScreenshotGallery";
 import { formatDate, formatHours } from "@/lib/format";
 import type { GameDetail } from "@/lib/types";
+
 
 /*
 GameDetailModal component is responsible for displaying detailed information about a selected game.
@@ -195,6 +197,7 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
     content = (
       <div className="space-y-8">
         <Details detail={result.detail} />
+        <PlaytimeGraph key={key} steamId={steamId} appId={appId} />
         <section aria-labelledby={screenshotsId}>
           <h3 id={screenshotsId} className="mb-3 text-xs uppercase tracking-wide text-muted">
             Screenshots
