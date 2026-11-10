@@ -2,14 +2,15 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import StatusMessage from "@/components/compare/StatusMessage";
 import { ApiError, getGameDetail } from "@/lib/api";
+import ScreenshotGallery from "@/components/library/ScreenshotGallery";
 import { formatDate, formatHours } from "@/lib/format";
 import type { GameDetail } from "@/lib/types";
 
 /*
 GameDetailModal component is responsible for displaying detailed information about a selected game.
-It fetches the game details from the Steam API and displays them in a modal dialog.
-The modal includes information such as total playtime, last played date, achievements, and more.
-It handles loading states, error states, and provides accessibility features like focus management and keyboard navigation.
+  It fetches the game details from the Steam API and displays them in a modal dialog.
+  The modal includes information such as total playtime, last played date, achievements, and more.
+  It handles loading states, error states, and provides accessibility features like focus management and keyboard navigation.
 */
 
 interface GameDetailModalProps {
@@ -108,6 +109,7 @@ function Details({ detail }: { detail: GameDetail }) {
 
 export default function GameDetailModal({ steamId, appId, onClose }: GameDetailModalProps) {
   const titleId = useId();
+  const screenshotsId = useId();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
@@ -145,6 +147,8 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
+        // Something inside the dialog (the screenshot viewer) already handled it.
+        if (event.defaultPrevented) return;
         onCloseRef.current();
         return;
       }
@@ -188,7 +192,17 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
   } else if (result.status === "error") {
     content = <StatusMessage title={result.title} message={result.message} />;
   } else {
-    content = <Details detail={result.detail} />;
+    content = (
+      <div className="space-y-8">
+        <Details detail={result.detail} />
+        <section aria-labelledby={screenshotsId}>
+          <h3 id={screenshotsId} className="mb-3 text-xs uppercase tracking-wide text-muted">
+            Screenshots
+          </h3>
+          <ScreenshotGallery screenshots={result.detail.screenshots} />
+        </section>
+      </div>
+    );
   }
 
   return (
@@ -199,7 +213,7 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-panel p-6 ring-1 ring-white/10"
+        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-panel p-6 ring-1 ring-white/10"
       >
         <div className="mb-6 flex items-center gap-3">
           {detail &&
