@@ -139,13 +139,18 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
     };
   }, [steamId, appId, key]);
 
-  // Focus the close button, keep Tab inside the dialog, close on Escape,
-  // lock page scroll, and hand focus back to the clicked tile on close.
+  // Focus the close button, keep Tab inside the dialog, close on Escape and
+  // lock page scroll. The parent hands focus back to the tile that opened it.
   useEffect(() => {
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
+    const { body, documentElement } = document;
+    const previousOverflow = body.style.overflow;
+    const previousPaddingRight = body.style.paddingRight;
+    // Hiding the scrollbar would make the page behind the modal jump sideways,
+    // so pad the body by the scrollbar's width while the modal is open.
+    const scrollbarWidth = window.innerWidth - documentElement.clientWidth;
+    body.style.overflow = "hidden";
+    if (scrollbarWidth > 0) body.style.paddingRight = `${scrollbarWidth}px`;
+    closeRef.current?.focus({ preventScroll: true });
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -175,8 +180,8 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      document.body.style.overflow = previousOverflow;
-      previouslyFocused?.focus();
+      body.style.overflow = previousOverflow;
+      body.style.paddingRight = previousPaddingRight;
     };
   }, []);
 

@@ -23,6 +23,7 @@ export default function GameTile({ game, onSelect, selected = false }: GameTileP
       <button
         type="button"
         onClick={() => onSelect(game.app_id)}
+        data-app-id={game.app_id}
         aria-describedby={tooltipId}
         aria-current={selected ? "true" : undefined}
         className="flex w-full items-center gap-3 rounded-xl bg-background/60 p-2.5 text-left ring-1 ring-white/10 transition-shadow hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent aria-[current=true]:ring-2 aria-[current=true]:ring-accent"
