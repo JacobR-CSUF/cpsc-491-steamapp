@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import PrivacyCheckButton from "@/components/privacy/PrivacyCheckButton";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -11,6 +12,7 @@ export default function PrivacyPage() {
         <h1 className="text-3xl font-semibold tracking-tight">
           Privacy Policy
         </h1>
+        <PrivacyCheckButton />
         <p className="text-sm text-muted">
           Last updated: <time dateTime="2026-11-10">November 10, 2026</time>
         </p>
@@ -51,6 +53,12 @@ export default function PrivacyPage() {
             comparison and when the comparison happened.
           </li>
         </ul>
+        <p className="leading-relaxed text-muted">
+          This browser remembers that you finished the privacy check.
+          It stores the completed policy version in local storage, without
+          a SteamID64 or profile details. If browser storage is blocked,
+          completion may not be remembered.
+        </p>
       </section>
 
       <section aria-labelledby="use-heading" className="space-y-3">
@@ -169,6 +177,11 @@ export default function PrivacyPage() {
         <p className="leading-relaxed text-muted">
           To request removal of stored data, contact the project team and
           identify the SteamID64 involved.
+        </p>
+        <p className="leading-relaxed text-muted">
+          You can clear this site’s browser data to forget the completed
+          privacy check. You can also use the interactive version above
+          to review the facts again.
         </p>
       </section>
 

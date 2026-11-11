@@ -12,6 +12,8 @@ import { isValidSteamId } from "@/lib/steamId";
 import type { Comparison, Player } from "@/lib/types";
 import Link from "next/link";
 import { errorMessage } from "@/lib/errors";
+import PrivCaptcha from "@/components/privacy/PrivCaptcha";
+import { hasCompletedPrivCap } from "@/lib/privcap";
 
 type Result =
   | { status: "ready"; comparison: Comparison; playerA: Player; playerB: Player }
@@ -25,7 +27,7 @@ function describeError(error: unknown): Result {
   };
 }
 
-export default function ComparisonView() {
+function ComparisonResults() {
   const router = useRouter();
   const params = useSearchParams();
   const a = (params.get("a") ?? "").trim();
@@ -124,4 +126,48 @@ export default function ComparisonView() {
       {content}
     </div>
   );
+}
+
+export default function ComparisonView() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const a = (params.get("a") ?? "").trim();
+  const b = (params.get("b") ?? "").trim();
+  const valid = isValidSteamId(a) && isValidSteamId(b) && a !== b;
+
+  const [allowed, setAllowed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Read browser storage after mounting, never during server rendering.
+    const timer = window.setTimeout(() => {
+      setAllowed(hasCompletedPrivCap());
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  // KAN-70 handles these links without making backend requests.
+  if (!valid) {
+    return <ComparisonResults />;
+  }
+
+  if (allowed === null) {
+    return (
+      <StatusMessage
+        title="Preparing comparison…"
+        message="Checking whether you have completed the privacy check."
+      />
+    );
+  }
+
+  if (!allowed) {
+    return (
+      <PrivCaptcha
+        onComplete={() => setAllowed(true)}
+        onClose={() => router.replace("/")}
+      />
+    );
+  }
+
+  return <ComparisonResults />;
 }
