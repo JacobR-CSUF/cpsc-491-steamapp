@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
 import { useId, useState } from "react";
 import type { CompletedGame } from "@/lib/types";
 
@@ -13,7 +14,7 @@ export default function CompletedGamesList({ games }: { games: CompletedGame[] }
     <div className="space-y-3">
       <ul id={listId} className="space-y-2 text-sm text-muted">
         {(showAll ? games : games.slice(0, 5)).map((game) => (
-          <li key={game.app_id} className="break-words">{game.name}</li>
+          <li key={game.app_id} title={game.name} className="truncate">{game.name}</li>
         ))}
       </ul>
       {games.length > 5 && (
@@ -24,7 +25,7 @@ export default function CompletedGamesList({ games }: { games: CompletedGame[] }
           onClick={() => setShowAll((all) => !all)}
           className="text-sm text-accent underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         >
-          {showAll ? "Show less" : `Show all (${games.length})`}
+          {showAll ? "Show less" : `Show all (${formatNumber(games.length)})`}
         </button>
       )}
     </div>

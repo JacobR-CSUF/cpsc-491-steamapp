@@ -20,7 +20,7 @@ export default function ErrorPage({ reset }: ErrorPageProps) {
         <button
           type="button"
           onClick={() => reset()}
-          className="rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
+          className="action-button rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
         >
           Try again
         </button>

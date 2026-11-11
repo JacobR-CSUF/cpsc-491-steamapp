@@ -1,3 +1,4 @@
+import SafeImage from "@/components/SafeImage";
 import type { Player } from "@/lib/types";
 
 interface PlayerHeaderProps {
@@ -6,11 +7,10 @@ interface PlayerHeaderProps {
 
 export default function PlayerHeader({ player }: PlayerHeaderProps) {
   return (
-    <div className="flex flex-col items-center gap-3 text-center">
+    <div className="flex min-w-0 flex-col items-center gap-3 text-center">
       <div className="h-24 w-24 overflow-hidden rounded-full bg-panel ring-1 ring-white/10">
         {player.avatar_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <SafeImage
             src={player.avatar_url}
             alt={player.persona_name}
             width={96}
@@ -19,8 +19,8 @@ export default function PlayerHeader({ player }: PlayerHeaderProps) {
           />
         )}
       </div>
-      <div>
-        <p className="text-lg font-semibold tracking-tight">{player.persona_name}</p>
+      <div className="min-w-0 w-full">
+        <p title={player.persona_name} className="truncate text-lg font-semibold tracking-tight">{player.persona_name}</p>
         {player.profile_url && (
           <a
             href={player.profile_url}

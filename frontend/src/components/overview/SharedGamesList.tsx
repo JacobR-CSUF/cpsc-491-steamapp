@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
 import { useId, useState } from "react";
 import type { AchievementSelection } from "@/components/overview/AchievementIcon";
 import GameAchievementGrid from "@/components/overview/GameAchievementGrid";
@@ -34,10 +35,10 @@ export default function SharedGamesList({ comparison, steamIdA, steamIdB, onSele
                   onClick={() => setExpandedAppId(expanded ? null : game.app_id)}
                   className="flex w-full flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-4 text-left transition-colors hover:bg-white/5 focus-visible:outline-2 focus-visible:outline-accent"
                 >
-                  <span className="min-w-0 flex-1 break-words font-medium">{game.name}</span>
+                  <span title={game.name} className="min-w-0 flex-1 truncate font-medium">{game.name}</span>
                   <span className="flex gap-4 text-sm tabular-nums text-muted">
-                    <span><span className="sr-only">Player A: </span>{game.unlocked_a} / {game.total}</span>
-                    <span><span className="sr-only">Player B: </span>{game.unlocked_b} / {game.total}</span>
+                    <span><span className="sr-only">Player A: </span>{formatNumber(game.unlocked_a)} / {formatNumber(game.total)}</span>
+                    <span><span className="sr-only">Player B: </span>{formatNumber(game.unlocked_b)} / {formatNumber(game.total)}</span>
                     <span aria-hidden="true" className="text-accent">{expanded ? "−" : "+"}</span>
                   </span>
                 </button>

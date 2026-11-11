@@ -120,7 +120,7 @@ export default function Home() {
           onClick={compete}
           disabled={!canCompete || checking}
           aria-busy={checking}
-          className="rounded-full bg-accent px-10 py-3 text-base font-semibold text-background transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="action-button rounded-full bg-accent px-10 py-3 text-base font-semibold text-background transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {checking ? "Checking profiles…" : "Compete"}
         </button>
@@ -130,7 +130,7 @@ export default function Home() {
             href="https://steamid.io/"
             target="_blank"
             rel="noreferrer"
-            className="text-accent underline-offset-4 hover:underline"
+            className="text-accent underline underline-offset-4"
           >
             this handy website
           </a>

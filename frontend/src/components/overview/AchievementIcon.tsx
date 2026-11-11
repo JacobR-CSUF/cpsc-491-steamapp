@@ -1,5 +1,6 @@
 "use client";
 
+import SafeImage from "@/components/SafeImage";
 import { useId, useState } from "react";
 import { formatDate } from "@/lib/format";
 import type { Achievement } from "@/lib/types";
@@ -41,8 +42,7 @@ export default function AchievementIcon({ achievement, unlockedAtA, unlockedAtB,
         className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-background transition-shadow focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${unlockedA && unlockedB ? "ring-2 ring-accent ring-offset-2 ring-offset-panel" : "ring-1 ring-white/10"}`}
       >
         {achievement.icon_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={achievement.icon_url} alt="" width={56} height={56} loading="lazy" className={`h-full w-full object-cover ${!unlockedA && !unlockedB ? "grayscale opacity-50" : ""}`} />
+          <SafeImage src={achievement.icon_url} alt="" width={56} height={56} loading="lazy" className={`h-full w-full object-cover ${!unlockedA && !unlockedB ? "grayscale opacity-50" : ""}`} />
         ) : (
           <span aria-hidden="true" className={`text-xl text-accent ${!unlockedA && !unlockedB ? "grayscale opacity-50" : ""}`}>★</span>
         )}

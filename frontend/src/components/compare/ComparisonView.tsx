@@ -1,5 +1,6 @@
 "use client";
 
+import { LoadingSkeleton } from "@/components/Skeleton";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import AdvancedTab from "@/components/advanced/AdvancedTab";
@@ -82,10 +83,7 @@ function ComparisonResults() {
     );
   } else if (result === null) {
     content = (
-      <StatusMessage
-        title="Comparing players…"
-        message="The first comparison of a large library can take a minute."
-      />
+      <LoadingSkeleton variant="overview" label="Comparing players… The first comparison of a large library can take a minute." />
     );
   } else if (result.status === "error") {
     content = (
@@ -99,7 +97,7 @@ function ComparisonResults() {
     const { comparison, playerA, playerB } = result;
     content = (
       <div className="space-y-12">
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-6">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:gap-6">
           <PlayerHeader player={playerA} />
           <span className="text-lg text-muted">vs</span>
           <PlayerHeader player={playerB} />
@@ -113,12 +111,12 @@ function ComparisonResults() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">Comparison</h1>
         <button
           type="button"
           onClick={() => router.push("/")}
-          className="rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
+          className="action-button rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
         >
           Reset View
         </button>

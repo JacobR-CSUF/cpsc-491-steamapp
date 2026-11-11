@@ -1,9 +1,11 @@
 "use client";
 
+import { LoadingSkeleton } from "@/components/Skeleton";
+import SafeImage from "@/components/SafeImage";
 import { useEffect, useState } from "react";
 import { getAdvancedStats } from "@/lib/api";
 import { errorMessage } from "@/lib/errors";
-import { formatPercent } from "@/lib/format";
+import { formatPercent, formatNumber } from "@/lib/format";
 import type { AdvancedStats } from "@/lib/types";
 
 const FIRST_ROWS = 10;
@@ -49,7 +51,7 @@ export default function MissingAchievementsPanel({
 
   let body;
   if (result === null) {
-    body = <p className="text-sm text-muted">Loading achievements…</p>;
+    body = <LoadingSkeleton label="Loading achievements…" />;
   } else if (result.status === "error") {
     body = <p className="text-sm text-muted">{result.message}</p>;
   } else {
@@ -62,7 +64,7 @@ export default function MissingAchievementsPanel({
         <div className="space-y-2">
           <div className="flex items-baseline justify-between text-sm">
             <span>
-              {stats.unlocked} of {stats.total}
+              {formatNumber(stats.unlocked)} of {formatNumber(stats.total)}
             </span>
             <span className="font-semibold text-accent">{formatPercent(stats.ratio)}</span>
           </div>
@@ -86,10 +88,9 @@ export default function MissingAchievementsPanel({
           <div className="space-y-3">
             <ul className="space-y-3">
               {shown.map((achievement) => (
-                <li key={achievement.api_name} className="flex items-start gap-3">
+                <li key={achievement.api_name} className="flex flex-wrap items-start gap-3">
                   {achievement.icon_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <SafeImage
                       src={achievement.icon_url}
                       alt=""
                       width={40}
@@ -100,7 +101,7 @@ export default function MissingAchievementsPanel({
                     <span className="h-10 w-10 shrink-0 rounded bg-white/10" />
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-foreground">
+                    <p title={achievement.display_name} className="truncate text-sm font-medium text-foreground">
                       {achievement.display_name}
                     </p>
                     {achievement.description && (
@@ -119,9 +120,9 @@ export default function MissingAchievementsPanel({
               <button
                 type="button"
                 onClick={() => setShowAllKey(key)}
-                className="rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
+                className="action-button rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
               >
-                Show all ({hidden} more)
+                Show all ({formatNumber(hidden)} more)
               </button>
             )}
           </div>
@@ -131,8 +132,8 @@ export default function MissingAchievementsPanel({
   }
 
   return (
-    <div className="space-y-4 rounded-xl bg-background/40 p-5 ring-1 ring-white/10">
-      <h4 className="font-semibold tracking-tight">{name}</h4>
+    <div className="space-y-4 min-w-0 rounded-2xl bg-panel p-4 sm:p-6 ring-1 ring-white/10">
+      <h4 title={name} className="truncate font-semibold tracking-tight">{name}</h4>
       {body}
     </div>
   );

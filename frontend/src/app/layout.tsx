@@ -15,7 +15,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Steam-User Showdown",
+  title: {
+    default: "Steam-User Showdown",
+    template: "%s · Steam-User Showdown",
+  },
   description:
     "Compare two Steam profiles by achievements, completion, and library stats.",
 };
@@ -28,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col">
         <SiteHeader />
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
+        <main className="mx-auto min-w-0 w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
           {children}
         </main>
         <SiteFooter />

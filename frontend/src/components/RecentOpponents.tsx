@@ -1,5 +1,6 @@
 "use client";
 
+import SafeImage from "@/components/SafeImage";
 import { useEffect, useState } from "react";
 import { getOpponents } from "@/lib/api";
 import { isValidSteamId } from "@/lib/steamId";
@@ -45,15 +46,15 @@ export default function RecentOpponents({ steamId, onSelect }: RecentOpponentsPr
       <p className="mb-2 text-sm text-muted">Recent opponents</p>
       <ul className="flex flex-wrap gap-2">
         {opponents.map(({ player }) => (
-          <li key={player.steam_id}>
+          <li key={player.steam_id} className="min-w-0 max-w-full">
             <button
               type="button"
               onClick={() => onSelect(player.steam_id)}
-              className="flex items-center gap-2 rounded-full border border-white/10 bg-panel py-1.5 pr-3.5 pl-1.5 text-sm text-foreground transition-colors hover:border-accent/60"
+              title={player.persona_name}
+              className="action-button flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-panel py-1.5 pr-3.5 pl-1.5 text-sm text-foreground transition-colors hover:border-accent/60"
             >
               {player.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <SafeImage
                   src={player.avatar_url}
                   alt=""
                   width={24}
@@ -63,7 +64,7 @@ export default function RecentOpponents({ steamId, onSelect }: RecentOpponentsPr
               ) : (
                 <span className="h-6 w-6 rounded-full bg-white/10" />
               )}
-              {player.persona_name}
+              <span className="truncate">{player.persona_name}</span>
             </button>
           </li>
         ))}

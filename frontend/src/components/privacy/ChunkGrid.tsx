@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
 import { useEffect, useId, useState } from "react";
 import {
   CHUNK_STYLES,
@@ -109,7 +110,7 @@ export default function ChunkGrid({
       <p role="status" aria-live="polite" className="min-h-10 text-sm text-muted">
         {allFound
           ? "All orange chunks found. Take five seconds to read the other facts."
-          : `${selected.size} of ${orangeChunks.length} orange chunks found`}
+          : `${formatNumber(selected.size)} of ${formatNumber(orangeChunks.length)} orange chunks found`}
       </p>
     </section>
   );

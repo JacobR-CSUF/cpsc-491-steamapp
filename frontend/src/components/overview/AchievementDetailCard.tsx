@@ -1,5 +1,6 @@
 "use client";
 
+import SafeImage from "@/components/SafeImage";
 import { useEffect, useId, useRef } from "react";
 import { unlockLabel, type AchievementSelection } from "@/components/overview/AchievementIcon";
 
@@ -48,8 +49,7 @@ export default function AchievementDetailCard({ achievement, unlockedAtA, unlock
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
             {achievement.icon_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={achievement.icon_url} alt="" width={64} height={64} className="h-16 w-16 shrink-0 rounded-lg" />
+              <SafeImage src={achievement.icon_url} alt="" width={64} height={64} className="h-16 w-16 shrink-0 rounded-lg" />
             )}
             <h2 id={titleId} className="break-words text-xl font-semibold text-accent">{achievement.display_name}</h2>
           </div>

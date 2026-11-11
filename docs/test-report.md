@@ -96,3 +96,38 @@ Settings were restored afterward.
   No API key is included in this report.
 - No remaining failures were reported in this test pass.
 - No additional bug tickets were required.
+
+## KAN-72 visual polish verification
+
+Updated page titles, theme icon, keyboard focus outlines, shared skeletons,
+image fallbacks, number formatting, and layout consistency.
+Manual results below were reported by the tester.
+
+| Check | Result | Notes |
+| --- | --- | --- |
+| TypeScript on prepared files | Pass | Checked the proposed replacement files against the local frontend project before copying. |
+| ESLint on prepared files | Pass | Checked all changed TypeScript files using the local frontend configuration before copying. |
+| Final Docker TypeScript and lint checks | Pass | Tester confirmed both Docker commands passed after the privacy-layout and landing-link fixes. |
+| 375, 768, and 1280 pixel layouts | Pass | Tester checked landing, results, library modal, advanced view, History, and Privacy. No overflow or cut-off controls were reported. |
+| Lighthouse accessibility: landing | Pass — 100 | Initially 96 because the help link relied on color. Added a permanent underline and retested successfully. |
+| Lighthouse accessibility: results | Pass — 100 | Chrome Lighthouse accessibility audit. |
+| Lighthouse accessibility: History | Pass — 100 | Chrome Lighthouse accessibility audit. |
+| Lighthouse accessibility: Privacy | Pass — 100 | Chrome Lighthouse accessibility audit. |
+| Final demo path | Pass | Tester confirmed Compete, privacy check, overview, library modal, advanced view, History, and Privacy all worked after the fixes. |
+
+### Issues fixed during KAN-72 verification
+
+- The nested privacy layout rendered duplicate HTML and body elements inside
+  the root layout's main element, causing a hydration error. Replaced the
+  nested layout with a fragment containing its children. The tester confirmed
+  the page worked afterward.
+- The landing page help link was distinguished by color until hovered.
+  Added a permanent underline. The tester confirmed the Lighthouse retest
+  passed.
+
+### Verification complete
+
+The tester confirmed that the final Docker TypeScript and lint checks passed
+and the complete demo walkthrough worked after the fixes. All KAN-72
+verification checks above are complete. The KAN-71 automated results above
+remain the results from the earlier requirements pass.

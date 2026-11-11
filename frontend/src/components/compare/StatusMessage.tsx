@@ -17,7 +17,7 @@ export default function StatusMessage({
         <button
           type="button"
           onClick={onRetry}
-          className="mt-5 rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
+          className="action-button mt-5 rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
         >
           Try again
         </button>

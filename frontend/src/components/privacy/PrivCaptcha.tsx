@@ -1,5 +1,6 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import ChunkGrid from "@/components/privacy/ChunkGrid";
 import {
@@ -17,7 +18,7 @@ interface PrivCaptchaProps {
 const COLORS: ChunkColor[] = ["orange", "teal", "yellow", "pink"];
 
 const BUTTON_CLASS =
-  "rounded-full bg-accent px-6 py-2 text-sm font-semibold text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "action-button rounded-full bg-accent px-6 py-2 text-sm font-semibold text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 export default function PrivCaptcha({
   onComplete,
@@ -76,7 +77,7 @@ export default function PrivCaptcha({
         event.preventDefault();
         onClose();
       }}
-      className="fixed inset-0 m-auto max-h-[90dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-2xl border border-white/10 bg-panel p-4 text-foreground shadow-xl backdrop:bg-black/70 sm:p-6"
+      className="fixed inset-0 m-auto max-h-[90dvh] w-[calc(100%_-_2rem)] max-w-xl overflow-y-auto rounded-2xl border border-white/10 bg-panel p-4 text-foreground shadow-xl backdrop:bg-black/70 sm:p-6"
     >
       <div className="mb-5 flex items-start justify-between gap-4">
         <h2
@@ -128,7 +129,7 @@ export default function PrivCaptcha({
       {screen && (
         <div className="space-y-3">
           <p className="text-sm text-muted">
-            {step + 1} of {PRIVCAP_SCREENS.length}
+            {formatNumber(step + 1)} of {formatNumber(PRIVCAP_SCREENS.length)}
           </p>
           <ChunkGrid
             key={screen.category}

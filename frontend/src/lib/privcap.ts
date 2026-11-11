@@ -3,13 +3,13 @@ export type ChunkColor = "orange" | "teal" | "yellow" | "pink";
 export const CHUNK_STYLES = {
   orange: {
     meaning: "Data we collect",
-    classes: "bg-orange-600 text-white",
-    selectedClasses: "bg-white text-orange-600",
+    classes: "bg-orange-700 text-white",
+    selectedClasses: "bg-white text-orange-700",
   },
   teal: {
     meaning: "Who sees or receives it",
-    classes: "bg-teal-600 text-white",
-    selectedClasses: "bg-white text-teal-600",
+    classes: "bg-teal-700 text-white",
+    selectedClasses: "bg-white text-teal-700",
   },
   yellow: {
     meaning: "How it’s sent or kept",
