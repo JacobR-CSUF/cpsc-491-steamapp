@@ -1,3 +1,4 @@
+import { formatNumber } from "@/lib/format";
 import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 
@@ -20,7 +21,7 @@ interface ViewerProps {
 }
 
 const BUTTON_CLASS =
-  "rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:pointer-events-none disabled:opacity-40";
+  "action-button rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:pointer-events-none disabled:opacity-40";
 
 // The larger view. It takes focus when it opens so the arrow keys work right away.
 function Viewer({ screenshots, index, onChange, onClose }: ViewerProps) {
@@ -74,13 +75,13 @@ function Viewer({ screenshots, index, onChange, onClose }: ViewerProps) {
           className="max-h-[55vh] w-full rounded-xl object-contain"
         />
       </div>
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button type="button" onClick={previous} disabled={count < 2} className={BUTTON_CLASS}>
           Previous
         </button>
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex flex-wrap items-center gap-3 text-sm">
           <span className="text-muted" aria-live="polite">
-            {index + 1} of {count}
+            {formatNumber(index + 1)} of {formatNumber(count)}
           </span>
           <button type="button" onClick={onClose} className={BUTTON_CLASS}>
             Back to thumbnails

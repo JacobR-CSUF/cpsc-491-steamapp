@@ -1,5 +1,7 @@
 "use client";
 
+import { formatNumber } from "@/lib/format";
+import { LoadingSkeleton } from "@/components/Skeleton";
 import { useEffect, useState } from "react";
 import {
   CartesianGrid,
@@ -13,6 +15,7 @@ import {
 } from "recharts";
 import { CHART_TOOLTIP_STYLE, PLAYER_COLORS } from "@/components/charts/colors";
 import { getAchievementTimeline } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import type { TimelineDays } from "@/lib/types";
 
 const DAY_OPTIONS: TimelineDays[] = [30, 60, 90];
@@ -34,7 +37,7 @@ interface ChartPoint {
 
 type Result =
   | { status: "ready"; points: ChartPoint[]; totalA: number; totalB: number }
-  | { status: "error" };
+  | { status: "error"; message: string };
 
 // Dates arrive as "YYYY-MM-DD" UTC days. Format them in UTC so a Pacific-time
 // browser doesn't shift "2026-11-08" back to Nov 7.
@@ -52,7 +55,7 @@ const longDate = new Intl.DateTimeFormat("en-US", {
 const toUtc = (day: string) => new Date(`${day}T00:00:00Z`);
 
 const toggleClass = (active: boolean) =>
-  `rounded-full px-3 py-1 text-sm transition-colors ${
+  `action-button rounded-full px-3 py-1 text-sm transition-colors ${
     active
       ? "bg-accent text-background"
       : "border border-white/10 text-muted hover:border-white/20 hover:text-foreground"
@@ -69,7 +72,7 @@ export default function TimelineChart({
   const [scope, setScope] = useState<Scope>("game");
 
   const gameId = scope === "game" ? appId : undefined;
-  const key = `${steamIdA}:${steamIdB}:${days}:${gameId ?? "all"}`;
+  const key = `${steamIdA}:${steamIdB}:${formatNumber(days)}:${gameId ?? "all"}`;
   const [loaded, setLoaded] = useState<{ key: string; result: Result } | null>(null);
 
   useEffect(() => {
@@ -102,8 +105,8 @@ export default function TimelineChart({
           });
         }
       })
-      .catch(() => {
-        if (active) setLoaded({ key, result: { status: "error" } });
+      .catch((error) => {
+        if (active) setLoaded({ key, result: { status: "error", message: errorMessage(error) } });
       });
 
     return () => {
@@ -115,30 +118,31 @@ export default function TimelineChart({
 
   let body;
   if (result === null) {
-    body = <p className="text-sm text-muted">Loading activity…</p>;
+    body = <LoadingSkeleton variant="chart" label="Loading activity…" />;
   } else if (result.status === "error") {
-    body = <p className="text-sm text-muted">Activity couldn’t be loaded. Try again.</p>;
+    body = <p role="alert" className="text-sm text-muted">{result.message}</p>;
   } else if (result.totalA === 0 && result.totalB === 0) {
-    body = <p className="text-sm text-muted">No unlocks in the last {days} days</p>;
+    body = <p className="text-sm text-muted">No unlocks in the last {formatNumber(days)} days</p>;
   } else {
     body = (
       <div className="space-y-4">
         <div className="flex flex-wrap gap-6 text-sm">
           <p>
-            <span className="font-semibold" style={{ color: PLAYER_COLORS.a }}>
+            <span title={nameA} className="inline-block max-w-full truncate align-bottom font-semibold" style={{ color: PLAYER_COLORS.a }}>
               {nameA}
             </span>{" "}
-            <span className="text-muted">{result.totalA} unlocks</span>
+            <span className="text-muted">{formatNumber(result.totalA)} unlocks</span>
           </p>
           <p>
-            <span className="font-semibold" style={{ color: PLAYER_COLORS.b }}>
+            <span title={nameB} className="inline-block max-w-full truncate align-bottom font-semibold" style={{ color: PLAYER_COLORS.b }}>
               {nameB}
             </span>{" "}
-            <span className="text-muted">{result.totalB} unlocks</span>
+            <span className="text-muted">{formatNumber(result.totalB)} unlocks</span>
           </p>
         </div>
         {/* ResponsiveContainer needs a parent with a fixed height. */}
-        <div className="h-72 w-full" role="group" aria-label="Daily achievement unlocks chart">
+        <div className="max-w-full overflow-x-auto">
+        <div className="h-72 min-w-[20rem] w-full" role="group" aria-label="Daily achievement unlocks chart">
           <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <LineChart
               data={result.points}
@@ -153,9 +157,10 @@ export default function TimelineChart({
                 tick={{ fontSize: 12 }}
                 minTickGap={24}
               />
-              <YAxis allowDecimals={false} stroke="#8f98a0" tick={{ fontSize: 12 }} />
+              <YAxis tickFormatter={(value: number) => formatNumber(value)} allowDecimals={false} stroke="#8f98a0" tick={{ fontSize: 12 }} />
               <Tooltip
                 contentStyle={CHART_TOOLTIP_STYLE}
+                formatter={(value) => formatNumber(Number(value))}
                 labelFormatter={(day) => longDate.format(toUtc(String(day)))}
               />
               <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -178,16 +183,17 @@ export default function TimelineChart({
             </LineChart>
           </ResponsiveContainer>
         </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 rounded-xl bg-background/40 p-5 ring-1 ring-white/10">
+    <div className="space-y-4 min-w-0 rounded-2xl bg-panel p-4 sm:p-6 ring-1 ring-white/10">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h4 className="font-semibold tracking-tight">Achievement activity</h4>
         <div className="flex flex-wrap gap-4">
-          <div className="flex gap-2" role="group" aria-label="Time range">
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Time range">
             {DAY_OPTIONS.map((option) => (
               <button
                 key={option}
@@ -196,7 +202,7 @@ export default function TimelineChart({
                 onClick={() => setDays(option)}
                 className={toggleClass(days === option)}
               >
-                {option} days
+                {formatNumber(option)} days
               </button>
             ))}
           </div>

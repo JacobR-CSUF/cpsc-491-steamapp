@@ -1,8 +1,11 @@
 "use client";
 
+import { LoadingSkeleton } from "@/components/Skeleton";
+import SafeImage from "@/components/SafeImage";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { getComparisons } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
 import { isValidSteamId } from "@/lib/steamId";
 import type { ComparisonRecord, Player } from "@/lib/types";
@@ -11,14 +14,13 @@ const LIMIT = 20;
 
 type Result =
   | { status: "ready"; records: ComparisonRecord[] }
-  | { status: "error" };
+  | { status: "error"; message: string };
 
 function Avatar({ player }: { player: Player }) {
   return (
     <span className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-white/10 ring-1 ring-white/10">
       {player.avatar_url && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <SafeImage
           src={player.avatar_url}
           alt=""
           width={32}
@@ -45,8 +47,8 @@ export default function HistoryList() {
       .then((records) => {
         if (active) setLoaded({ key, result: { status: "ready", records } });
       })
-      .catch(() => {
-        if (active) setLoaded({ key, result: { status: "error" } });
+      .catch((error) => {
+        if (active) setLoaded({ key, result: { status: "error", message: errorMessage(error) } });
       });
 
     return () => {
@@ -58,9 +60,9 @@ export default function HistoryList() {
 
   let content;
   if (result === null) {
-    content = <p className="text-sm text-muted">Loading history…</p>;
+    content = <LoadingSkeleton label="Loading history…" />;
   } else if (result.status === "error") {
-    content = <p className="text-sm text-muted">History couldn’t be loaded.</p>;
+    content = <p role="alert" className="text-sm text-muted">{result.message}</p>;
   } else if (result.records.length === 0) {
     content = <p className="text-sm text-muted">No comparisons yet.</p>;
   } else {
@@ -76,7 +78,7 @@ export default function HistoryList() {
                 <Avatar player={record.player_a} />
                 <Avatar player={record.player_b} />
               </div>
-              <p className="truncate">
+              <p title={`${record.player_a.persona_name} vs ${record.player_b.persona_name}`} className="truncate">
                 <span className="font-medium">{record.player_a.persona_name}</span>
                 <span className="text-muted"> vs </span>
                 <span className="font-medium">{record.player_b.persona_name}</span>

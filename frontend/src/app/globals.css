@@ -20,3 +20,33 @@ body {
   font-family: var(--font-sans);
   text-rendering: optimizeLegibility;
 }
+
+/* Keep focus visible even on controls with local outline utilities. */
+:focus-visible {
+  outline: 2px solid var(--color-accent) !important;
+  outline-offset: 3px;
+}
+
+.action-button {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  transition: background-color 150ms, border-color 150ms, color 150ms, filter 150ms;
+}
+
+.action-button:hover:not(:disabled):not([aria-disabled="true"]) {
+  filter: brightness(1.15);
+}
+
+.action-button:disabled {
+  cursor: not-allowed;
+}
+
+/* Long API text should wrap within its own panel. */
+p, dd, dt, h1, h2, h3, h4 {
+  overflow-wrap: anywhere;
+}
+
+.recharts-default-legend {
+  overflow-wrap: anywhere;
+}

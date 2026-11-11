@@ -21,8 +21,9 @@ export default function GameSelect({ games, value, onChange }: GameSelectProps) 
       <select
         id={selectId}
         value={value}
+        title={games.find((game) => game.app_id === value)?.name}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full max-w-sm rounded-lg border border-white/10 bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
+        className="min-w-0 w-full max-w-sm truncate rounded-lg border border-white/10 bg-background px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
       >
         {sorted.map((game) => (
           <option key={game.app_id} value={game.app_id}>

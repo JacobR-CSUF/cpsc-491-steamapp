@@ -1,5 +1,6 @@
 "use client";
 
+import { LoadingSkeleton } from "@/components/Skeleton";
 import { useState } from "react";
 import { ApiError, getSuggestions } from "@/lib/api";
 
@@ -56,23 +57,21 @@ export default function AiSuggestionBox({ steamId, appId, name }: AiSuggestionBo
   }
 
   return (
-    <div className="space-y-4 rounded-xl bg-background/40 p-5 ring-1 ring-white/10">
-      <div className="flex items-center justify-between gap-4">
-        <h4 className="font-semibold tracking-tight">Tips for {name}</h4>
+    <div className="space-y-4 min-w-0 rounded-2xl bg-panel p-4 sm:p-6 ring-1 ring-white/10">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h4 title={`Tips for ${name}`} className="min-w-0 max-w-full truncate font-semibold tracking-tight">Tips for {name}</h4>
         <button
           type="button"
           onClick={requestTips}
           disabled={loading}
-          className="rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="action-button rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           Get tips
         </button>
       </div>
 
       {current?.status === "loading" && (
-        <p className="text-sm text-muted" role="status">
-          Generating tips…
-        </p>
+        <LoadingSkeleton label="Generating tips…" />
       )}
       {current?.status === "error" && (
         <p className="text-sm text-muted" role="alert">

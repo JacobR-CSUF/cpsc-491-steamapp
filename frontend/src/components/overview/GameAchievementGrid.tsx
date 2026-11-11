@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AchievementIcon, { type AchievementSelection } from "@/components/overview/AchievementIcon";
 import { getGameAchievements } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 
 interface GameAchievementGridProps {
   appId: number;
@@ -38,8 +39,8 @@ export default function GameAchievementGrid({ appId, steamIdA, steamIdB, onSelec
         });
         if (active) setResult({ items });
       })
-      .catch(() => {
-        if (active) setResult({ error: "Achievements couldn’t be loaded. Try again." });
+      .catch((error) => {
+        if (active) setResult({ error: errorMessage(error) });
       });
     return () => { active = false; };
   }, [appId, steamIdA, steamIdB, attempt]);

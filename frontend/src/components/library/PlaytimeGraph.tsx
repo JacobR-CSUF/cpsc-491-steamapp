@@ -1,3 +1,4 @@
+import { LoadingSkeleton } from "@/components/Skeleton";
 import { useEffect, useId, useState } from "react";
 import {
   CartesianGrid,
@@ -10,8 +11,9 @@ import {
 } from "recharts";
 import { PLAYER_COLORS } from "@/components/charts/colors";
 import StatusMessage from "@/components/compare/StatusMessage";
-import { ApiError, getPlaytimeGraph } from "@/lib/api";
-import { formatDate, formatHours } from "@/lib/format";
+import { getPlaytimeGraph } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
+import { formatDate, formatHours, formatNumber } from "@/lib/format";
 import type { PlaytimeGraph as PlaytimeGraphData } from "@/lib/types";
 
 /*
@@ -41,13 +43,10 @@ const MUTED = "#8f98a0";
 const GRID = "rgba(255, 255, 255, 0.08)";
 
 function describeError(error: unknown): Result {
-  if (error instanceof ApiError && (error.status === 403 || error.status === 404)) {
-    return { status: "error", title: "Playtime graph unavailable", message: error.detail };
-  }
   return {
     status: "error",
-    title: "Steam unavailable",
-    message: "Steam could not be reached. Try again.",
+    title: "Playtime graph unavailable",
+    message: errorMessage(error),
   };
 }
 
@@ -107,12 +106,12 @@ function Chart({ graph }: { graph: PlaytimeGraphData }) {
   const ticks = buildTicks(data[0].time, data[data.length - 1].time);
 
   return (
-    <div className="space-y-2">
+    <div className="min-w-0 max-w-full space-y-2 overflow-x-auto">
       {/* ResponsiveContainer needs a parent with a fixed height. */}
       <div
         role="img"
         aria-label={`Chart of ${data.length} unlocked ${data.length === 1 ? "achievement" : "achievements"} against estimated hours played`}
-        className="h-64 w-full"
+        className="h-64 min-w-[20rem] w-full"
       >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
@@ -129,6 +128,7 @@ function Chart({ graph }: { graph: PlaytimeGraphData }) {
               stroke={GRID}
             />
             <YAxis
+              tickFormatter={(value: number) => formatNumber(value, 1)}
               dataKey="hours"
               width={56}
               tick={{ fill: MUTED, fontSize: 11 }}
@@ -201,10 +201,7 @@ export default function PlaytimeGraph({ steamId, appId }: PlaytimeGraphProps) {
   let body;
   if (result === null) {
     body = (
-      <StatusMessage
-        title="Loading playtime graph..."
-        message="This can take a moment if Steam is slow."
-      />
+      <LoadingSkeleton variant="chart" label="Loading playtime graph…" />
     );
   } else if (result.status === "error") {
     body = (
@@ -213,7 +210,7 @@ export default function PlaytimeGraph({ steamId, appId }: PlaytimeGraphProps) {
         <button
           type="button"
           onClick={retry}
-          className="rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
+          className="action-button rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
         >
           Try again
         </button>

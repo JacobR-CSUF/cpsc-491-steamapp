@@ -7,7 +7,7 @@ import type { AchievementSelection } from "@/components/overview/AchievementIcon
 import ComparisonCharts from "@/components/overview/ComparisonCharts";
 import SharedGamesList from "@/components/overview/SharedGamesList";
 import StatRow from "@/components/overview/StatRow";
-import { formatCents } from "@/lib/format";
+import { formatCents, formatNumber } from "@/lib/format";
 import type { Comparison, Player } from "@/lib/types";
 
 interface OverviewPanelProps {
@@ -35,19 +35,20 @@ export default function OverviewPanel({ comparison, playerA, playerB }: Overview
           aria-expanded={expanded}
           aria-controls={panelId}
           onClick={() => setExpanded((open) => !open)}
-          className="rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
+          className="action-button rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
         >
           {expanded ? "Minimize" : "Expand"}
         </button>
       </div>
       <div id={panelId} hidden={!expanded} className="border-t border-white/10 px-4 pb-6 sm:px-6">
-        <table className="w-full table-fixed">
+        <div className="max-w-full overflow-x-auto">
+        <table className="w-full min-w-[28rem] table-fixed">
           <caption className="sr-only">Headline statistics for {playerA.persona_name} and {playerB.persona_name}</caption>
           <thead>
             <tr>
-              <th scope="col" className="break-words py-5 pr-2 text-left text-sm font-semibold sm:pr-6">{playerA.persona_name}</th>
+              <th scope="col" title={playerA.persona_name} className="truncate py-5 pr-2 text-left text-sm font-semibold sm:pr-6">{playerA.persona_name}</th>
               <th scope="col"><span className="sr-only">Statistic</span></th>
-              <th scope="col" className="break-words py-5 pl-2 text-right text-sm font-semibold sm:pl-6">{playerB.persona_name}</th>
+              <th scope="col" title={playerB.persona_name} className="truncate py-5 pl-2 text-right text-sm font-semibold sm:pl-6">{playerB.persona_name}</th>
             </tr>
           </thead>
           <tbody>
@@ -63,10 +64,11 @@ export default function OverviewPanel({ comparison, playerA, playerB }: Overview
             <StatRow label="100% completed games" valueA={statsA.completed_games.length} valueB={statsB.completed_games.length} />
           </tbody>
         </table>
+        </div>
         <div className="border-t border-white/10 pt-5 text-center">
           <p className="text-sm text-muted">Mutual achievements</p>
           <p className="mt-1 text-2xl font-semibold tabular-nums text-accent">
-            {comparison.mutual_achievements.toLocaleString("en-US")}
+            {formatNumber(comparison.mutual_achievements)}
           </p>
         </div>
         <AchievementComparisonCards comparison={comparison} playerA={playerA} playerB={playerB} />

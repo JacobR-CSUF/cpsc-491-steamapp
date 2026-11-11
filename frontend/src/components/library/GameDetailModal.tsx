@@ -1,10 +1,13 @@
+import { LoadingSkeleton } from "@/components/Skeleton";
+import SafeImage from "@/components/SafeImage";
 import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import StatusMessage from "@/components/compare/StatusMessage";
-import { ApiError, getGameDetail } from "@/lib/api";
+import { getGameDetail } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import PlaytimeGraph from "@/components/library/PlaytimeGraph";
 import ScreenshotGallery from "@/components/library/ScreenshotGallery";
-import { formatDate, formatHours } from "@/lib/format";
+import { formatDate, formatHours, formatNumber, formatPercent } from "@/lib/format";
 import type { GameDetail } from "@/lib/types";
 
 
@@ -26,13 +29,10 @@ type Result =
   | { status: "error"; title: string; message: string };
 
 function describeError(error: unknown): Result {
-  if (error instanceof ApiError && (error.status === 403 || error.status === 404)) {
-    return { status: "error", title: "Game details unavailable", message: error.detail };
-  }
   return {
     status: "error",
-    title: "Steam unavailable",
-    message: "Steam could not be reached. Try again.",
+    title: "Game details unavailable",
+    message: errorMessage(error),
   };
 }
 
@@ -76,8 +76,8 @@ function Details({ detail }: { detail: GameDetail }) {
       <Stat label="Achievements" className="col-span-2">
         {total > 0 ? (
           <>
-            {unlocked} of {total}
-            <span className="ml-2 text-sm text-muted">{percent}%</span>
+            {formatNumber(unlocked)} of {formatNumber(total)}
+            <span className="ml-2 text-sm text-muted">{formatPercent(percent)}</span>
             <div
               role="progressbar"
               aria-label="Achievement progress"
@@ -191,10 +191,7 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
   let content;
   if (result === null) {
     content = (
-      <StatusMessage
-        title="Loading game details..."
-        message="This can take a moment if Steam is slow."
-      />
+      <LoadingSkeleton label="Loading game details…" />
     );
   } else if (result.status === "error") {
     content = <StatusMessage title={result.title} message={result.message} />;
@@ -221,14 +218,13 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-panel p-6 ring-1 ring-white/10"
+        className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-panel p-4 sm:p-6 ring-1 ring-white/10"
       >
         <div className="mb-6 flex items-center gap-3">
           {detail &&
             (detail.icon_url ? (
-              // Steam icons are small remote images, so a plain <img> is enough.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              // Steam icons are small remote images, so a plain <SafeImage> is enough.
+              <SafeImage
                 src={detail.icon_url}
                 alt=""
                 width={40}
@@ -243,7 +239,7 @@ export default function GameDetailModal({ steamId, appId, onClose }: GameDetailM
                 {detail.name.charAt(0).toUpperCase()}
               </span>
             ))}
-          <h2 id={titleId} className="min-w-0 flex-1 text-xl font-semibold tracking-tight">
+          <h2 id={titleId} title={detail?.name} className="min-w-0 flex-1 truncate text-xl font-semibold tracking-tight">
             {detail ? detail.name : "Game details"}
           </h2>
           <button

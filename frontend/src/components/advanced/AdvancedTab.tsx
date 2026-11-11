@@ -80,7 +80,7 @@ export default function AdvancedTab({ steamIdA, steamIdB, sharedGames }: Advance
       </h2>
 
       {expanded && (
-        <div id={panelId} className="rounded-2xl bg-panel p-6 ring-1 ring-white/10">
+        <div id={panelId} className="rounded-2xl bg-panel p-4 sm:p-6 ring-1 ring-white/10">
           {selected ? (
             <div className="space-y-6">
               <GameSelect
@@ -89,10 +89,10 @@ export default function AdvancedTab({ steamIdA, steamIdB, sharedGames }: Advance
                 onChange={setSelectedAppId}
               />
               <div>
-                <h3 className="text-lg font-semibold tracking-tight text-accent">
+                <h3 title={selected.name} className="truncate text-lg font-semibold tracking-tight text-accent">
                   {selected.name}
                 </h3>
-                <p className="text-sm text-muted">
+                <p title={`${nameA} vs ${nameB}`} className="truncate text-sm text-muted">
                   {nameA} vs {nameB}
                 </p>
               </div>

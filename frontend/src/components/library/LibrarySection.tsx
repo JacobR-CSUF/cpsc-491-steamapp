@@ -1,7 +1,10 @@
+import { formatNumber } from "@/lib/format";
+import { LoadingSkeleton } from "@/components/Skeleton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import GameDetailModal from "@/components/library/GameDetailModal";
 import GameTile from "@/components/library/GameTile";
-import { ApiError, getLibrary, getPlayer } from "@/lib/api";
+import { getLibrary, getPlayer } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import type { OwnedGame } from "@/lib/types";
 
 /*
@@ -22,13 +25,6 @@ type Side = "a" | "b";
 type LibraryState =
   | { status: "ready"; games: OwnedGame[] }
   | { status: "error"; message: string };
-
-function describeError(error: unknown): string {
-  if (error instanceof ApiError && (error.status === 403 || error.status === 404)) {
-    return error.detail;
-  }
-  return "Steam could not be reached. Try again.";
-}
 
 export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionProps) {
   const [side, setSide] = useState<Side>("a");
@@ -74,7 +70,7 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
       .catch((error) => {
         setLibraries((prev) => ({
           ...prev,
-          [selectedId]: { status: "error", message: describeError(error) },
+          [selectedId]: { status: "error", message: errorMessage(error) },
         }));
       });
   }, [selectedId, attempt]);
@@ -134,9 +130,7 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
   let body;
   if (library === undefined) {
     body = (
-      <p className="text-sm text-muted">
-        Loading library... The first load of a large library can take a minute.
-      </p>
+      <LoadingSkeleton variant="library" label="Loading library… The first load of a large library can take a minute." />
     );
   } else if (library.status === "error") {
     body = (
@@ -145,7 +139,7 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
         <button
           type="button"
           onClick={retry}
-          className="rounded-full border border-white/10 px-4 py-1.5 text-muted transition-colors hover:border-white/20 hover:text-foreground"
+          className="action-button rounded-full border border-white/10 px-4 py-1.5 text-muted transition-colors hover:border-white/20 hover:text-foreground"
         >
           Try again
         </button>
@@ -157,7 +151,7 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
     body = (
       <div className="space-y-4">
         <p className="text-sm text-muted" aria-live="polite">
-          Showing {visible.length} of {filtered.length} games
+          Showing {formatNumber(visible.length)} of {formatNumber(filtered.length)} games
         </p>
         {filtered.length === 0 ? (
           <p className="text-sm text-muted">No games match your search.</p>
@@ -178,9 +172,9 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
           <button
             type="button"
             onClick={() => setShown(filtered.length)}
-            className="rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
+            className="action-button rounded-full border border-white/10 px-4 py-1.5 text-sm text-muted transition-colors hover:border-white/20 hover:text-foreground"
           >
-            Show more ({remaining} more)
+            Show more ({formatNumber(remaining)} more)
           </button>
         )}
       </div>
@@ -192,19 +186,20 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
       <h2 id="library-title" className="mb-3 text-xl font-semibold tracking-tight">
         Libraries
       </h2>
-      <div className="space-y-6 rounded-2xl bg-panel p-6 ring-1 ring-white/10">
+      <div className="space-y-6 rounded-2xl bg-panel p-4 sm:p-6 ring-1 ring-white/10">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div role="tablist" aria-label="Player libraries" className="flex gap-2">
+          <div role="tablist" aria-label="Player libraries" className="flex min-w-0 max-w-full gap-2">
             {tabs.map((tab) => (
               <button
                 key={tab.side}
+                title={names[tab.id] ?? tab.fallback}
                 type="button"
                 role="tab"
                 id={`library-tab-${tab.side}`}
                 aria-selected={side === tab.side}
                 aria-controls="library-panel"
                 onClick={() => selectSide(tab.side)}
-                className={`rounded-full px-4 py-1.5 text-sm ring-1 transition-colors ${
+                className={`action-button min-w-0 truncate rounded-full px-4 py-1.5 text-sm ring-1 transition-colors ${
                   side === tab.side
                     ? "bg-accent/15 text-accent ring-accent/40"
                     : "text-muted ring-white/10 hover:text-foreground"

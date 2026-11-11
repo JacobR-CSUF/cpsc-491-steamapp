@@ -1,5 +1,6 @@
 "use client";
 
+import SafeImage from "@/components/SafeImage";
 import { useEffect, useState } from "react";
 import { getPlayer } from "@/lib/api";
 import { isValidSteamId } from "@/lib/steamId";
@@ -36,11 +37,10 @@ export default function PlayerAvatar({ steamId }: PlayerAvatarProps) {
   const player = loaded.id === trimmed ? loaded.player : null;
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex min-w-0 w-full flex-col items-center gap-3">
       <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-panel ring-1 ring-white/10">
         {player?.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <SafeImage
             src={player.avatar_url}
             alt={player.persona_name}
             width={96}
@@ -61,7 +61,7 @@ export default function PlayerAvatar({ steamId }: PlayerAvatarProps) {
           </svg>
         )}
       </div>
-      <p className="h-5 text-sm text-muted">{player?.persona_name ?? "\u00a0"}</p>
+      <p title={player?.persona_name} className="h-5 max-w-full truncate text-sm text-muted">{player?.persona_name ?? "\u00a0"}</p>
     </div>
   );
 }

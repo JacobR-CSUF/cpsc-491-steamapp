@@ -1,3 +1,4 @@
+import SafeImage from "@/components/SafeImage";
 import { useId } from "react";
 import { formatHours } from "@/lib/format";
 import type { OwnedGame } from "@/lib/types";
@@ -29,9 +30,8 @@ export default function GameTile({ game, onSelect, selected = false }: GameTileP
         className="flex w-full items-center gap-3 rounded-xl bg-background/60 p-2.5 text-left ring-1 ring-white/10 transition-shadow hover:ring-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent aria-[current=true]:ring-2 aria-[current=true]:ring-accent"
       >
         {game.icon_url ? (
-          // Steam icons are small remote images, so a plain <img> is enough.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          // Steam icons are small remote images, so a plain <SafeImage> is enough.
+          <SafeImage
             src={game.icon_url}
             alt=""
             width={32}
@@ -47,13 +47,13 @@ export default function GameTile({ game, onSelect, selected = false }: GameTileP
             {game.name.charAt(0).toUpperCase()}
           </span>
         )}
-        <span className="min-w-0 truncate text-sm text-foreground">{game.name}</span>
+        <span title={game.name} className="min-w-0 truncate text-sm text-foreground">{game.name}</span>
       </button>
 
       <div
         id={tooltipId}
         role="tooltip"
-        className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-2 w-max max-w-56 -translate-x-1/2 rounded-lg bg-background px-3 py-2 text-xs opacity-0 shadow-lg ring-1 ring-white/15 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
+        className="pointer-events-none absolute bottom-full left-0 z-20 mb-2 w-max max-w-full rounded-lg bg-background px-3 py-2 text-xs opacity-0 shadow-lg ring-1 ring-white/15 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
       >
         <p className="font-medium text-foreground">{game.name}</p>
         <p className="mt-1 text-muted">

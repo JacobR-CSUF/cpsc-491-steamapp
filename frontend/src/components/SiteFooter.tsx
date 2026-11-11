@@ -1,3 +1,4 @@
+import Link from "next/link";
 import BackendStatus from "@/components/BackendStatus";
 
 export default function SiteFooter() {
@@ -10,14 +11,23 @@ export default function SiteFooter() {
             <BackendStatus />
           </div>
         </div>
-        <a
-          href="https://store.steampowered.com"
-          target="_blank"
-          rel="noreferrer"
-          className="transition-colors hover:text-foreground"
-        >
-          Powered by Steam
-        </a>
+
+        <div className="flex flex-wrap items-center gap-6">
+          <Link
+            href="/privacy"
+            className="transition-colors hover:text-foreground"
+          >
+            Privacy
+          </Link>
+          <a
+            href="https://store.steampowered.com"
+            target="_blank"
+            rel="noreferrer"
+            className="transition-colors hover:text-foreground"
+          >
+            Powered by Steam
+          </a>
+        </div>
       </div>
     </footer>
   );

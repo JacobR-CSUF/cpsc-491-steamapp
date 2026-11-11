@@ -1,15 +1,17 @@
+import { LoadingSkeleton } from "@/components/Skeleton";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import ComparisonView from "@/components/compare/ComparisonView";
-import StatusMessage from "@/components/compare/StatusMessage";
+
+export const metadata: Metadata = {
+  title: "Results",
+};
 
 export default function ComparePage() {
   return (
     <Suspense
       fallback={
-        <StatusMessage
-          title="Comparing players…"
-          message="The first comparison of a large library can take a minute."
-        />
+        <LoadingSkeleton variant="overview" label="Preparing comparison…" />
       }
     >
       <ComparisonView />
