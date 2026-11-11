@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from app.services.steam_client import PrivateProfileError, SteamApiError
 from app.controllers.health import router as health_router
 from app.controllers.players import router as players_router
 from app.controllers.screenshots import router as screenshots_router
@@ -16,6 +18,23 @@ from app.controllers.playtime import router as playtime_router
 def create_app() -> FastAPI:
     app = FastAPI(title="Steam-User Showdown")
     settings = get_settings()
+    @app.exception_handler(PrivateProfileError)
+    async def private_profile_handler(
+        request: Request, exc: PrivateProfileError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "This player’s game details are private."},
+        )
+
+    @app.exception_handler(SteamApiError)
+    async def steam_api_handler(
+        request: Request, exc: SteamApiError
+    ) -> JSONResponse:
+        return JSONResponse(
+            status_code=502,
+            content={"detail": "Steam couldn’t be reached. Try again in a minute."},
+        )
 
     app.add_middleware(
         CORSMiddleware,

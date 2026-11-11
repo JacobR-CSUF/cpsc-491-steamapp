@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { getComparisons } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
 import { isValidSteamId } from "@/lib/steamId";
 import type { ComparisonRecord, Player } from "@/lib/types";
@@ -11,7 +12,7 @@ const LIMIT = 20;
 
 type Result =
   | { status: "ready"; records: ComparisonRecord[] }
-  | { status: "error" };
+  | { status: "error"; message: string };
 
 function Avatar({ player }: { player: Player }) {
   return (
@@ -45,8 +46,8 @@ export default function HistoryList() {
       .then((records) => {
         if (active) setLoaded({ key, result: { status: "ready", records } });
       })
-      .catch(() => {
-        if (active) setLoaded({ key, result: { status: "error" } });
+      .catch((error) => {
+        if (active) setLoaded({ key, result: { status: "error", message: errorMessage(error) } });
       });
 
     return () => {
@@ -60,7 +61,7 @@ export default function HistoryList() {
   if (result === null) {
     content = <p className="text-sm text-muted">Loading history…</p>;
   } else if (result.status === "error") {
-    content = <p className="text-sm text-muted">History couldn’t be loaded.</p>;
+    content = <p role="alert" className="text-sm text-muted">{result.message}</p>;
   } else if (result.records.length === 0) {
     content = <p className="text-sm text-muted">No comparisons yet.</p>;
   } else {

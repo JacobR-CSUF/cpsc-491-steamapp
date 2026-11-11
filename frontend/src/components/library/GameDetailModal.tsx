@@ -1,7 +1,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import StatusMessage from "@/components/compare/StatusMessage";
-import { ApiError, getGameDetail } from "@/lib/api";
+import { getGameDetail } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import PlaytimeGraph from "@/components/library/PlaytimeGraph";
 import ScreenshotGallery from "@/components/library/ScreenshotGallery";
 import { formatDate, formatHours } from "@/lib/format";
@@ -26,13 +27,10 @@ type Result =
   | { status: "error"; title: string; message: string };
 
 function describeError(error: unknown): Result {
-  if (error instanceof ApiError && (error.status === 403 || error.status === 404)) {
-    return { status: "error", title: "Game details unavailable", message: error.detail };
-  }
   return {
     status: "error",
-    title: "Steam unavailable",
-    message: "Steam could not be reached. Try again.",
+    title: "Game details unavailable",
+    message: errorMessage(error),
   };
 }
 

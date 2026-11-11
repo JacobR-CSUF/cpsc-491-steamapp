@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import GameDetailModal from "@/components/library/GameDetailModal";
 import GameTile from "@/components/library/GameTile";
-import { ApiError, getLibrary, getPlayer } from "@/lib/api";
+import { getLibrary, getPlayer } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import type { OwnedGame } from "@/lib/types";
 
 /*
@@ -22,13 +23,6 @@ type Side = "a" | "b";
 type LibraryState =
   | { status: "ready"; games: OwnedGame[] }
   | { status: "error"; message: string };
-
-function describeError(error: unknown): string {
-  if (error instanceof ApiError && (error.status === 403 || error.status === 404)) {
-    return error.detail;
-  }
-  return "Steam could not be reached. Try again.";
-}
 
 export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionProps) {
   const [side, setSide] = useState<Side>("a");
@@ -74,7 +68,7 @@ export default function LibrarySection({ steamIdA, steamIdB }: LibrarySectionPro
       .catch((error) => {
         setLibraries((prev) => ({
           ...prev,
-          [selectedId]: { status: "error", message: describeError(error) },
+          [selectedId]: { status: "error", message: errorMessage(error) },
         }));
       });
   }, [selectedId, attempt]);

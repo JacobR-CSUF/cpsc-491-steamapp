@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { CHART_TOOLTIP_STYLE, PLAYER_COLORS } from "@/components/charts/colors";
 import { getAchievementTimeline } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import type { TimelineDays } from "@/lib/types";
 
 const DAY_OPTIONS: TimelineDays[] = [30, 60, 90];
@@ -34,7 +35,7 @@ interface ChartPoint {
 
 type Result =
   | { status: "ready"; points: ChartPoint[]; totalA: number; totalB: number }
-  | { status: "error" };
+  | { status: "error"; message: string };
 
 // Dates arrive as "YYYY-MM-DD" UTC days. Format them in UTC so a Pacific-time
 // browser doesn't shift "2026-11-08" back to Nov 7.
@@ -102,8 +103,8 @@ export default function TimelineChart({
           });
         }
       })
-      .catch(() => {
-        if (active) setLoaded({ key, result: { status: "error" } });
+      .catch((error) => {
+        if (active) setLoaded({ key, result: { status: "error", message: errorMessage(error) } });
       });
 
     return () => {
@@ -117,7 +118,7 @@ export default function TimelineChart({
   if (result === null) {
     body = <p className="text-sm text-muted">Loading activity…</p>;
   } else if (result.status === "error") {
-    body = <p className="text-sm text-muted">Activity couldn’t be loaded. Try again.</p>;
+    body = <p role="alert" className="text-sm text-muted">{result.message}</p>;
   } else if (result.totalA === 0 && result.totalB === 0) {
     body = <p className="text-sm text-muted">No unlocks in the last {days} days</p>;
   } else {

@@ -10,7 +10,8 @@ import {
 } from "recharts";
 import { PLAYER_COLORS } from "@/components/charts/colors";
 import StatusMessage from "@/components/compare/StatusMessage";
-import { ApiError, getPlaytimeGraph } from "@/lib/api";
+import { getPlaytimeGraph } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import { formatDate, formatHours } from "@/lib/format";
 import type { PlaytimeGraph as PlaytimeGraphData } from "@/lib/types";
 
@@ -41,13 +42,10 @@ const MUTED = "#8f98a0";
 const GRID = "rgba(255, 255, 255, 0.08)";
 
 function describeError(error: unknown): Result {
-  if (error instanceof ApiError && (error.status === 403 || error.status === 404)) {
-    return { status: "error", title: "Playtime graph unavailable", message: error.detail };
-  }
   return {
     status: "error",
-    title: "Steam unavailable",
-    message: "Steam could not be reached. Try again.",
+    title: "Playtime graph unavailable",
+    message: errorMessage(error),
   };
 }
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ApiError, getAdvancedStats } from "@/lib/api";
+import { getAdvancedStats } from "@/lib/api";
+import { errorMessage } from "@/lib/errors";
 import { formatPercent } from "@/lib/format";
 import type { AdvancedStats } from "@/lib/types";
 
@@ -34,10 +35,7 @@ export default function MissingAchievementsPanel({
         if (active) setLoaded({ key, result: { status: "ready", stats } });
       })
       .catch((error) => {
-        const message =
-          error instanceof ApiError && (error.status === 403 || error.status === 404)
-            ? error.detail
-            : "Achievements couldn’t be loaded. Try again.";
+        const message = errorMessage(error);
         if (active) setLoaded({ key, result: { status: "error", message } });
       });
 

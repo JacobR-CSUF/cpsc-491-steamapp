@@ -8,7 +8,6 @@ from app.db.session import get_db
 from app.schemas.comparison import ComparisonOut
 from app.services import comparison_service, history_service, profile_status
 from app.services.profile_status import ProfileStatus, STATUS_MESSAGES
-from app.services.steam_client import PrivateProfileError, SteamApiError
 
 router = APIRouter(prefix="/api", tags=["comparisons"])
 
@@ -35,9 +34,3 @@ def read_comparison(
         return comparison
     except comparison_service.ComparisonProfileError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except PrivateProfileError as exc:
-        raise HTTPException(
-            status_code=403, detail=STATUS_MESSAGES[ProfileStatus.games_private]
-        ) from exc
-    except SteamApiError as exc:
-        raise HTTPException(status_code=502, detail="Steam API is unavailable.") from exc

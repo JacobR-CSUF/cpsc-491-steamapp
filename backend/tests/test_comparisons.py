@@ -193,8 +193,8 @@ def test_profile_disappears_during_sync(client, monkeypatch):
 
 @pytest.mark.parametrize("source", ["status", "sync"])
 @pytest.mark.parametrize("error, code, message", [
-    (PrivateProfileError, 403, STATUS_MESSAGES[ProfileStatus.games_private]),
-    (SteamApiError, 502, "Steam API is unavailable."),
+    (PrivateProfileError, 403, "This player’s game details are private."),
+    (SteamApiError, 502, "Steam couldn’t be reached. Try again in a minute."),
 ])
 def test_steam_error(client, monkeypatch, source, error, code, message):
     def fail(*args):
